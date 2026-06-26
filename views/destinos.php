@@ -1,227 +1,191 @@
-<!-- Header Start -->
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$title = 'Provincias de La Paz - TekoPorã';
+ob_start();
+?>
+
+<style>
+    /* Estilos modernos para las tarjetas de provincias */
+    .provincia-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+        border: none;
+        background: #fff;
+    }
+    .provincia-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(33, 127, 130, 0.15) !important;
+    }
+    .card-img-wrapper {
+        position: relative;
+        height: 220px;
+        overflow: hidden;
+        background: linear-gradient(45deg, #1A6A6D, #217F82); /* Fondo base si no hay imagen */
+    }
+    .card-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    .provincia-card:hover .card-img-wrapper img {
+        transform: scale(1.1);
+    }
+    .badge-region {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #1A6A6D;
+        font-weight: bold;
+        padding: 5px 15px;
+        border-radius: 50px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        z-index: 2;
+    }
+    .btn-explorar {
+        background-color: #217F82;
+        color: white;
+        border-radius: 50px;
+        font-weight: bold;
+        transition: 0.3s;
+    }
+    .btn-explorar:hover {
+        background-color: #1A6A6D;
+        color: #F2B705;
+    }
+</style>
+
 <div class="container-fluid p-0">
     <div id="header-carousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
-                <img class="w-100" src="public/imgs/mercado.jpeg" alt="Salar de Uyuni">
+                <img class="w-100" src="<?= asset('imgs/valle.jpeg') ?>" alt="Paisaje La Paz" style="height: 400px; object-fit: cover; filter: brightness(0.65);">
                 <div class="carousel-caption d-flex flex-column align-items-center justify-content-center">
                     <div class="p-3" style="max-width: 900px;">
-                        <h4 class="display-4 text-white text-uppercase mb-md-3">DESTINOS TURÍSTICOS</h4>
-                        <p class="m-0 text-uppercase">Inicio  >>  La Paz - Macrodistritos</p>
+                        <h4 class="display-4 text-white text-uppercase font-weight-bold mb-md-3" style="letter-spacing: 2px;">DEPARTAMENTO DE LA PAZ</h4>
+                        <p class="m-0 text-uppercase font-weight-bold text-warning">Inicio >> Catálogo de Provincias</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- Header End -->
-
-<!-- Destinos Start -->
-<div class="container-fluid py-5">
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h6 class="text-primary text-uppercase" style="letter-spacing: 5px;">Descubre La Paz</h6>
-            <h1 class="mb-3">Destinos por Macrodistrito</h1>
-            <p class="lead">Explora los lugares turísticos de los 9 macrodistritos de La Paz</p>
-        </div>
-
-        <!-- Filtros rápidos -->
-        <div class="row mb-5">
-            <div class="col-lg-12">
-                <div class="btn-group flex-wrap justify-content-center" role="group">
-                    <button class="btn btn-outline-primary m-1 active" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('todos')">Todos</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Mallasa')">Mallasa</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Zona Sur')">Zona Sur</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('San Antonio')">San Antonio</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Periférica')">Periférica</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Max Paredes')">Max Paredes</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Cotahuma')">Cotahuma</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Centro')">Centro</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Hampaturi')">Hampaturi</button>
-                    <button class="btn btn-outline-primary m-1" style="border-color: #217F82; color: #217F82;" onclick="filtrarDestinos('Zongo')">Zongo</button>
+<div class="container-fluid py-4 bg-light border-bottom">
+    <div class="container">
+        <div class="row align-items-center justify-content-between">
+            <div class="col-lg-4 mb-3 mb-lg-0">
+                <h5 class="font-weight-bold text-dark m-0"><i class="fa fa-map text-info mr-2"></i> Explora nuestras Provincias</h5>
+            </div>
+            <div class="col-lg-8">
+                <div class="row">
+                    <div class="col-md-6 mb-2 mb-md-0">
+                        <select class="form-control border-0 shadow-sm" id="filtroRegion" onchange="aplicarFiltros()" style="border-radius: 10px;">
+                            <option value="todos">Todas las Zonas Geográficas</option>
+                            <option value="Altiplano">Altiplano</option>
+                            <option value="Valles">Valles</option>
+                            <option value="Yungas">Yungas</option>
+                            <option value="Amazonía">Amazonía</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="input-group shadow-sm" style="border-radius: 10px; overflow: hidden;">
+                            <input type="text" class="form-control border-0" id="buscarTexto" placeholder="Buscar provincia o capital..." oninput="aplicarFiltros()">
+                            <div class="input-group-append">
+                                <span class="input-group-text bg-white border-0 text-info"><i class="fa fa-search"></i></span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="row" id="destinosContainer">
-            <!-- Se carga con JS -->
-        </div>
     </div>
 </div>
-<!-- Destinos End -->
+
+<div class="container-fluid py-5 bg-white">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h6 class="text-primary text-uppercase font-weight-bold" style="letter-spacing: 5px;">TekoPorã Bolivia</h6>
+            <h2 class="mb-3 font-weight-bold" style="color: #1A6A6D;">Las 20 Provincias Paceñas</h2>
+            <p class="text-muted">Selecciona una provincia para descubrir sus municipios y proyectos.</p>
+        </div>
+
+        <div class="row" id="contenedorProvincias">
+            </div>
+    </div>
+</div>
+
 
 <script>
-// Base de datos simulada de destinos
-const destinosDB = [
-    {
-        id: 1,
-        nombre: "Valle de la Luna",
-        macro: "Mallasa",
-        tipo: "Formación natural",
-        descripcion: "Formaciones arcillosas de millones de años con formas caprichosas. A solo 10 km del centro de La Paz.",
-        imagen: "valle-luna.jpg",
-        rating: 4.5,
-        visitas: "50k+"
-    },
-    {
-        id: 2,
-        nombre: "Muela del Diablo",
-        macro: "Mallasa",
-        tipo: "Formación rocosa",
-        descripcion: "Imponente formación rocosa con vistas panorámicas de La Paz. Ideal para senderismo.",
-        imagen: "muela-diablo.jpg",
-        rating: 4.3,
-        visitas: "20k+"
-    },
-    {
-        id: 3,
-        nombre: "Parque de las Águilas",
-        macro: "Zona Sur",
-        tipo: "Parque",
-        descripcion: "Parque urbano con áreas verdes, juegos infantiles y miradores.",
-        imagen: "parque-aguilas.jpg",
-        rating: 4.4,
-        visitas: "35k+"
-    },
-    {
-        id: 4,
-        nombre: "Mirador Killi Killi",
-        macro: "Centro",
-        tipo: "Mirador",
-        descripcion: "Mirador con vista de 360 grados de la ciudad de La Paz. Ideal para fotos.",
-        imagen: "killi-killi.jpg",
-        rating: 4.8,
-        visitas: "100k+"
-    },
-    {
-        id: 5,
-        nombre: "Plaza Murillo",
-        macro: "Centro",
-        tipo: "Plaza histórica",
-        descripcion: "Plaza principal de La Paz, rodeada de edificios gubernamentales y catedral.",
-        imagen: "plaza-murillo.jpg",
-        rating: 4.6,
-        visitas: "200k+"
-    },
-    {
-        id: 6,
-        nombre: "Chacaltaya",
-        macro: "Zongo",
-        tipo: "Montaña",
-        descripcion: "Antigua estación de esquí a 5.420 msnm. Vista impresionante de los Andes.",
-        imagen: "chacaltaya.jpg",
-        rating: 4.7,
-        visitas: "30k+"
-    },
-    {
-        id: 7,
-        nombre: "Mirador Jach'a Kollo",
-        macro: "Hampaturi",
-        tipo: "Mirador",
-        descripcion: "Mirador comunitario con vista a toda la cuenca de Hampaturi.",
-        imagen: "jacha-kollo.jpg",
-        rating: 4.2,
-        visitas: "5k+"
-    },
-    {
-        id: 8,
-        nombre: "Parque Urbano Central",
-        macro: "Centro",
-        tipo: "Parque",
-        descripcion: "Pulmón verde en el centro de La Paz, con lagunas y espacios deportivos.",
-        imagen: "puc.jpg",
-        rating: 4.5,
-        visitas: "150k+"
-    },
-    {
-        id: 9,
-        nombre: "Cementerio General",
-        macro: "Max Paredes",
-        tipo: "Sitio histórico",
-        descripcion: "Cementerio con arquitectura y mausoleos históricos. Visitas guiadas nocturnas.",
-        imagen: "cementerio.jpg",
-        rating: 4.0,
-        visitas: "25k+"
-    },
-    {
-        id: 10,
-        nombre: "Valle de las Ánimas",
-        macro: "Mallasa",
-        tipo: "Formación natural",
-        descripcion: "Formaciones rocosas espectaculares, ideal para trekking.",
-        imagen: "valle-animas.jpg",
-        rating: 4.6,
-        visitas: "15k+"
-    },
-    {
-        id: 11,
-        nombre: "Teleférico La Paz",
-        macro: "Centro",
-        tipo: "Atracción",
-        descripcion: "La red de teleférico más larga del mundo, con vistas panorámicas.",
-        imagen: "teleferico.jpg",
-        rating: 4.9,
-        visitas: "1M+"
-    },
-    {
-        id: 12,
-        nombre: "Cascada de Zongo",
-        macro: "Zongo",
-        tipo: "Cascada",
-        descripcion: "Cascada de 50 metros en medio de la selva nublada de Zongo.",
-        imagen: "cascada-zongo.jpg",
-        rating: 4.7,
-        visitas: "8k+"
-    }
+
+// 1. BASE DE DATOS (Tus 20 provincias intactas)
+const provinciasDB = [
+    { id: 1, nombre: "Abel Iturralde", capital: "Ixiamas", region: "Amazonía", imagen: "iturralde.jpg", descripcion: "La provincia más extensa y amazónica del norte paceño." },
+    { id: 2, nombre: "Aroma", capital: "Sica Sica", region: "Altiplano", imagen: "aroma.jpg", descripcion: "Cuna de historia y vastas planicies altiplánicas." },
+    { id: 3, nombre: "Bautista Saavedra", capital: "Charazani", region: "Valles", imagen: "saavedra.jpg", descripcion: "Tierra de los famosos médicos tradicionales Kallawayas." },
+    { id: 4, nombre: "Caranavi", capital: "Caranavi", region: "Yungas", imagen: "caranavi.jpg", descripcion: "La capital cafetalera de Bolivia por excelencia." },
+    { id: 5, nombre: "Eliodoro Camacho", capital: "Puerto Acosta", region: "Altiplano", imagen: "eliodoro.jpg", descripcion: "Provincia fronteriza a orillas del majestuoso Lago Titicaca." },
+    { id: 6, nombre: "Franz Tamayo", capital: "Apolo", region: "Amazonía", imagen: "franztamayo.jpg", descripcion: "Hogar del Parque Nacional Madidi, reserva de biodiversidad." },
+    { id: 7, nombre: "Gualberto Villarroel", capital: "San Pedro de Curahuara", region: "Altiplano", imagen: "gualberto.png", descripcion: "Importante productora de camélidos y quinua." },
+    { id: 8, nombre: "Ingavi", capital: "Viacha", region: "Altiplano", imagen: "ingavi.jpg", descripcion: "Centro industrial y sede de las ruinas arqueológicas de Tiwanaku." },
+    { id: 9, nombre: "Inquisivi", capital: "Inquisivi", region: "Valles", imagen: "inquisivi.jpg", descripcion: "Zona de valles profundos y rica historia republicana." },
+    { id: 10, nombre: "José Manuel Pando", capital: "Santiago de Machaca", region: "Altiplano", imagen: "pando.jpg", descripcion: "Provincia ganadera en la frontera occidental del país." },
+    { id: 11, nombre: "Larecaja", capital: "Sorata", region: "Valles", imagen: "larecaja.jpg", descripcion: "El paraíso terrenal a los pies del imponente nevado Illampu." },
+    { id: 12, nombre: "Loayza", capital: "Luribay", region: "Valles", imagen: "loayza.jpg", descripcion: "Famosa por su exquisita producción de duraznos y vinos de altura." },
+    { id: 13, nombre: "Los Andes", capital: "Pucarani", region: "Altiplano", imagen: "losandes.jpg", descripcion: "Tierra de la imponente Cordillera Real y nevados eternos." },
+    { id: 14, nombre: "Manco Kapac", capital: "Copacabana", region: "Altiplano", imagen: "mancokapac.jpg", descripcion: "Santuario y principal puerto turístico del Lago Titicaca." },
+    { id: 15, nombre: "Muñecas", capital: "Chuma", region: "Valles", imagen: "muñecas.jpg", descripcion: "Provincia de abruptos valles y rica herencia cultural." },
+    { id: 16, nombre: "Nor Yungas", capital: "Coroico", region: "Yungas", imagen: "noryungas.jpg", descripcion: "Destino turístico principal y cuna de la cultura afroboliviana." },
+    { id: 17, nombre: "Omasuyos", capital: "Achacachi", region: "Altiplano", imagen: "omasuyos.jpg", descripcion: "Los famosos 'Ponchos Rojos', guardianes de la cultura Aymara." },
+    { id: 18, nombre: "Pacajes", capital: "Coro Coro", region: "Altiplano", imagen: "pacajes.jpg", descripcion: "Centro minero histórico y tierra de los 'hombres águila'." },
+    { id: 19, nombre: "Pedro Domingo Murillo", capital: "Palca", region: "Altiplano", imagen: "murillo.jpg", descripcion: "Sede de gobierno, incluye a las ciudades de La Paz y El Alto." },
+    { id: 20, nombre: "Sud Yungas", capital: "Chulumani", region: "Yungas", imagen: "sudyungas.jpg", descripcion: "Paraíso de clima subtropical, abundante vegetación y cascadas." }
 ];
 
-function mostrarDestinos(filtro = 'todos') {
-    const container = document.getElementById('destinosContainer');
+// 2. MEMORIA DE ESTADO (Para evitar re-renderizados inútiles)
+let temporizadorBuscador;
+let ultimoTexto = "";
+let ultimaRegion = "todos";
+
+// 3. LÓGICA DE DIBUJADO
+function renderizarProvincias(datos) {
+    const contenedor = document.getElementById('contenedorProvincias');
     let html = '';
-    
-    const filtrados = filtro === 'todos' 
-        ? destinosDB 
-        : destinosDB.filter(d => d.macro === filtro);
-    
-    filtrados.forEach(destino => {
-        // Generar estrellas
-        let estrellas = '';
-        for (let i = 1; i <= 5; i++) {
-            if (i <= Math.floor(destino.rating)) {
-                estrellas += '<i class="fas fa-star text-warning"></i>';
-            } else if (i - destino.rating < 1 && i - destino.rating > 0) {
-                estrellas += '<i class="fas fa-star-half-alt text-warning"></i>';
-            } else {
-                estrellas += '<i class="far fa-star text-warning"></i>';
-            }
-        }
         
+
+    if(datos.length === 0) {
+        contenedor.innerHTML = `
+            <div class="col-12 text-center py-5">
+                <i class="fa fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No se encontraron provincias con esos criterios.</h4>
+            </div>
+        `;
+        return;
+    }
+
+    datos.forEach(prov => {
+        let iconoRegion = 'fa-mountain';
+        if(prov.region === 'Amazonía') iconoRegion = 'fa-leaf';
+        if(prov.region === 'Valles') iconoRegion = 'fa-seedling';
+        if(prov.region === 'Yungas') iconoRegion = 'fa-tree';
+
         html += `
-            <div class="col-lg-4 col-md-6 mb-4 destino-card">
-                <div class="card border-0 shadow-sm h-100">
-                    <img src="public/imgs/${destino.imagen}" class="card-img-top" alt="${destino.nombre}" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <h5 class="card-title mb-0">${destino.nombre}</h5>
-                            <span class="badge" style="background-color: #217F82; color: white;">${destino.macro}</span>
-                        </div>
-                        <p class="text-muted small mb-2">
-                            <i class="fas fa-tag mr-1" style="color: #217F82;"></i>${destino.tipo}
-                        </p>
-                        <p class="card-text small">${destino.descripcion}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                ${estrellas}
-                                <small class="ml-1">(${destino.rating})</small>
-                            </div>
-                            <small class="text-muted">
-                                <i class="fas fa-eye mr-1"></i>${destino.visitas}
-                            </small>
-                        </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm provincia-card h-100">
+                    <div class="card-img-wrapper">
+                        <span class="badge-region"><i class="fa ${iconoRegion} mr-1"></i> ${prov.region}</span>
+                        <img src="<?= asset('imgs/') ?>${prov.imagen}" alt="${prov.nombre}" onerror="this.onerror=null; this.src='https://via.placeholder.com/400x250/1A6A6D/FFFFFF?text=Sin+Imagen'">
                     </div>
-                    <div class="card-footer bg-white border-0 pb-3">
-                        <button class="btn btn-sm btn-block" style="background-color: #217F82; color: white;" onclick="verDestino(${destino.id})">
-                            <i class="fas fa-info-circle mr-2"></i>Ver detalles
+                    <div class="card-body d-flex flex-column">
+                        <h4 class="font-weight-bold text-dark mb-1">${prov.nombre}</h4>
+                        <p class="text-info font-weight-bold small mb-2"><i class="fa fa-map-pin mr-1"></i> Capital: ${prov.capital}</p>
+                        <p class="text-muted small flex-grow-1">${prov.descripcion}</p>
+                        
+                        <button class="btn btn-explorar w-100 py-2 mt-3" onclick="verMunicipios(${prov.id}, '${prov.nombre}')">
+                            Ver Municipios <i class="fa fa-arrow-right ml-2"></i>
                         </button>
                     </div>
                 </div>
@@ -229,51 +193,44 @@ function mostrarDestinos(filtro = 'todos') {
         `;
     });
     
-    if (filtrados.length === 0) {
-        html = `
-            <div class="col-12">
-                <div class="alert alert-info text-center py-5">
-                    <i class="fas fa-map-marked-alt fa-3x mb-3"></i>
-                    <h4>No hay destinos en este macrodistrito</h4>
-                    <p>¿Conoces algún lugar? ¡Agrégalo al mapa!</p>
-                    <a href="add-tourist-site.php" class="btn btn-primary" style="background-color: #217F82; border-color: #217F82;">
-                        Agregar sitio
-                    </a>
-                </div>
-            </div>
-        `;
-    }
-    
-    container.innerHTML = html;
-    
-    // Actualizar botones activos
-    document.querySelectorAll('.btn-group .btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    if (filtro === 'todos') {
-        document.querySelector('.btn-group .btn:first-child').classList.add('active');
-    } else {
-        event.target.classList.add('active');
-    }
+
+    contenedor.innerHTML = html;
 }
 
-function filtrarDestinos(macro) {
-    mostrarDestinos(macro);
+// 4. FILTRO INTELIGENTE (Debounce + Verificación de estado)
+function aplicarFiltros() {
+    clearTimeout(temporizadorBuscador);
+
+    temporizadorBuscador = setTimeout(() => {
+        const textoActual = document.getElementById('buscarTexto').value.toLowerCase().trim();
+        const regionActual = document.getElementById('filtroRegion').value;
+
+        // ¡EL CANDADO! Si el usuario hizo clic pero el texto y el filtro no cambiaron, abortamos.
+        if (textoActual === ultimoTexto && regionActual === ultimaRegion) {
+            return; 
+        }
+
+        // Si realmente cambió, actualizamos nuestra memoria
+        ultimoTexto = textoActual;
+        ultimaRegion = regionActual;
+
+        // Y filtramos
+        const filtrados = provinciasDB.filter(prov => {
+            const coincideTexto = prov.nombre.toLowerCase().includes(textoActual) || prov.capital.toLowerCase().includes(textoActual);
+            const coincideRegion = (regionActual === 'todos' || prov.region === regionActual);
+            return coincideTexto && coincideRegion;
+        });
+
+        renderizarProvincias(filtrados);
+    }, 250); // 250ms de gracia
 }
 
-function verDestino(id) {
-    const destino = destinosDB.find(d => d.id === id);
-    alert(`📍 ${destino.nombre}\n\n` +
-          `Macrodistrito: ${destino.macro}\n` +
-          `Tipo: ${destino.tipo}\n` +
-          `Rating: ${destino.rating}\n` +
-          `Visitas: ${destino.visitas}\n\n` +
-          `${destino.descripcion}\n\n` +
-          `(Simulación - Aquí irían más detalles cuando el backend esté listo)`);
+unction verMunicipios(idProvincia, nombreProvincia) {
+    window.location.href = "<?= url('/municipios?prov=') ?>" + idProvincia;
 }
 
-// Cargar destinos al inicio
-document.addEventListener('DOMContentLoaded', function() {
-    mostrarDestinos('todos');
+// Inicializar la vista
+document.addEventListener('DOMContentLoaded', () => {
+    renderizarProvincias(provinciasDB);
 });
 </script>
