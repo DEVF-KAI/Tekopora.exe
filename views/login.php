@@ -1,138 +1,194 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-
-    <title>Login - TekoPorã Bolivia</title>
+    <title>Iniciar Sesión | TekoPorã Bolivia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         body {
-            /* Aseguramos que el fondo cubra todo bien */
-            background: url(<?= asset('imgs/boli.png') ?>) no-repeat center center fixed;
-            background-size: cover;
+            /* OVERLAY GRIS OSCURO */
+            background: linear-gradient(rgba(35, 40, 45, 0.75), rgba(35, 40, 45, 0.85)), url('<?= asset('imgs/boli.png') ?>') center/cover fixed;
             min-height: 100vh;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            font-family: 'Segoe UI', sans-serif;
+            justify-content: center;
         }
 
-        /* Contenedor que agrupa el logo y la tarjeta */
-        .login-wrapper {
+        .auth-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
             width: 100%;
-            max-width: 400px;
-            padding: 15px;
-            animation: fadeIn 1s ease-in-out;
+            max-width: 420px;
+            padding: 40px;
+            animation: slideUp 0.5s ease-out;
         }
 
-        /* Estilo interactivo para el logo */
-        .logo-container img {
-            width: 200px;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+        .auth-logo {
+            width: 180px;
+            margin-bottom: 25px;
             transition: transform 0.3s ease;
-            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        .logo-container img:hover {
-            transform: scale(1.05);
+        .auth-logo:hover {
+            transform: translateY(-5px);
         }
 
-        .login-card {
-            background: #fff;
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-            width: 100%;
-        }
-
-        .login-card h2 {
+        .auth-title {
+            color: #2c3e50;
             font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: #0d6efd;
-            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .auth-subtitle {
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        .input-group-text {
+            background: #f8f9fa;
+            border-right: none;
+            color: #2A6F97;
+            border-radius: 10px 0 0 10px;
         }
 
         .form-control {
-            border-radius: 0.75rem;
-            padding-left: 2.5rem;
+            background: #f8f9fa;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            padding: 12px 15px;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
+        .form-control:focus {
+            background: #fff;
+            box-shadow: none;
+            border-color: #ced4da;
         }
 
-        .btn-custom {
-            border-radius: 0.75rem;
-            font-weight: bold;
-            background: #0d6efd;
-            color: #fff;
-            transition: 0.3s;
+        .btn-primary-custom {
+            background: #2A6F97;
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
 
-        .btn-custom:hover {
-            background: #0b5ed7;
+        .btn-primary-custom:hover {
+            background: #1d506e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(42, 111, 151, 0.3);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
+        .btn-google {
+            background: #fff;
+            border: 1px solid #dfe1e5;
+            color: #3c4043;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 500;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-google:hover {
+            background: #f8f9fa;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #a0a5aa;
+            margin: 20px 0;
+            font-size: 0.85rem;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .divider:not(:empty)::before { margin-right: .25em; }
+        .divider:not(:empty)::after { margin-left: .25em; }
+
+        .auth-links a {
+            color: #2A6F97;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
-
 <body>
 
-    <div class="login-wrapper">
+    <div class="auth-card text-center">
         
-        <div class="text-center mb-4 logo-container">
-            <a href="<?= url('/') ?>" title="Volver al Inicio">
-                <img src="<?= asset('imgs/logo_tekopora.png') ?>" alt="Logo TekoPorã Bolivia" class="bg-white rounded-pill px-3 py-2 shadow-sm">
-            </a>
-        </div>
+        <a href="<?= url('/') ?>">
+            <img src="<?= asset('imgs/logo_tekopora.png') ?>" alt="TekoPorã Bolivia" class="auth-logo">
+        </a>
+        
+        <h1 class="auth-title">Bienvenido de vuelta</h1>
+        <p class="auth-subtitle">Ingresa tus credenciales para continuar</p>
 
-        <div class="login-card">
-            <h2><i class="fa fa-user-circle"></i> Iniciar Sesión</h2>
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger py-2 text-start small mb-4 shadow-sm" style="border-radius: 8px;">
+                <i class="fa fa-exclamation-triangle me-2"></i> <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
 
-            <?php if (!empty($_SESSION['error'])): ?>
-                <div class="alert alert-danger mt-2 mb-3 text-center" style="font-size: 0.9em; border-radius: 10px;">
-                    <?= htmlspecialchars($_SESSION['error']) ?>
-                </div>
-                <script>
-                    console.error("<?= addslashes($_SESSION['error']) ?>");
-                </script>
-                <?php unset($_SESSION['error']); ?>
-            <?php endif; ?>
+        <?php if (!empty($_SESSION['success'])): ?>
+            <div class="alert alert-success py-2 text-start small mb-4 shadow-sm" style="border-radius: 8px;">
+                <i class="fa fa-check-circle me-2"></i> <?= htmlspecialchars($_SESSION['success']) ?>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
 
-            <form action="<?= url('/login') ?>" method="POST">
-                <div class="mb-3 position-relative">
-                    <i class="fa fa-envelope input-icon"></i>
+        <form action="<?= url('/login') ?>" method="POST" class="text-start">
+            
+            <div class="mb-3">
+                <div class="input-group shadow-sm rounded-3">
+                    <span class="input-group-text"><i class="far fa-envelope"></i></span>
                     <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
                 </div>
-                <div class="mb-3 position-relative">
-                    <i class="fa fa-lock input-icon"></i>
+            </div>
+            
+            <div class="mb-4">
+                <div class="input-group shadow-sm rounded-3">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
                     <input type="password" name="password" class="form-control" placeholder="Contraseña" required>
                 </div>
-                <button type="submit" class="btn btn-custom w-100 py-2">Ingresar</button>
-                <div class="text-center mt-3">
-                    <a href="#" class="text-decoration-none small">¿Olvidaste tu contraseña?</a>
-                    <br>
-                    <a href="<?= url('/register') ?>" class="text-decoration-none font-weight-bold mt-2 d-inline-block">Crear una cuenta</a>
-                </div>
-            </form>
-        </div>
-        
+            </div>
+            
+            <button type="submit" class="btn btn-primary-custom w-100 text-white shadow-sm">
+                Iniciar Sesión
+            </button>
+            
+            <div class="divider">o continúa con</div>
+
+            <a href="<?= url('/auth/google') ?>" class="btn btn-google w-100 shadow-sm text-decoration-none">
+                <img src="https://www.google.com/favicon.ico" alt="Google" width="18"> 
+                Continuar con Google
+            </a>
+
+            <div class="auth-links mt-4">
+                <p class="mb-1 small">¿Aún no eres parte? <a href="<?= url('/register') ?>">Crea una cuenta ciudadana</a></p>
+                <a href="<?= url('/recuperar') ?>" class="small text-muted fw-normal">Olvidé mi contraseña</a>
+            </div>
+        </form>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

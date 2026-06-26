@@ -2,23 +2,27 @@
 
 DB="tekopora_db"
 USER="root"
+# Ajusta el socket si es necesario para tu entorno Linux
 SOCKET="/opt/lampp/var/mysql/mysql.sock"
 
-# Generar password en bcrypt
+echo "Iniciando migración en Linux..."
+
+# Generar password en bcrypt usando el PHP del sistema
 ADMIN_PASS=$(php -r "echo password_hash('admin123', PASSWORD_BCRYPT);")
 
-# Ejecutar SQL
-mysql -u $USER --socket=$SOCKET < migracion.sql
+# Crear DB y Ejecutar estructura
+mysql -u $USER --socket=$SOCKET -e "DROP DATABASE IF EXISTS $DB; CREATE DATABASE $DB;"
+mysql -u $USER --socket=$SOCKET $DB < migracion_5.sql
 
-# Insertar usuario administrador
+# Insertar usuario administrador con la nueva estructura
 mysql -u $USER --socket=$SOCKET $DB -e "
-INSERT INTO usuarios (codigo, nombre, paterno, materno, ci, email, password)
-VALUES ('ADM001', 'Admin', 'Sistema', '', '0000', 'admin@biblioteca.com', '$ADMIN_PASS');
+INSERT INTO usuario (google_id, codigoUsuario, ci, nombre, appPaterno, appMaterno, email, passwordHash, estado)
+VALUES (NULL, 'ADM001', '0000', 'Admin', 'Sistema', '', 'admin@tekopora.com', '$ADMIN_PASS', 'Activo');
 "
 
+# Vincular Rol (Asumiendo que Administrador es ID 1)
 mysql -u $USER --socket=$SOCKET $DB -e "
-INSERT INTO roles_permiso (usuarios_idusuarios, roles_idroles)
-VALUES (1, 1);
+INSERT INTO usuario_rol (idUsuario_FK, idRol_FK) VALUES (1, 1);
 "
 
-echo "Migración completa. Usuario administrador creado con contraseña: admin123"
+echo "Migración completa para TekoPorã. Admin: admin@tekopora.com / Pass: admin123"

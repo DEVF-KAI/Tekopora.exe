@@ -138,6 +138,12 @@ ob_start();
             <p class="text-muted">Mostrando <b><?= count($proyectos) ?></b> proyectos registrados.</p>
         </div>
         <div class="col-md-6 text-md-right">
+            <?php if (isset($_SESSION['usuario']) && $_SESSION['usuario']['rol'] === 'Administrador'): ?>
+                <a href="<?= url('/reportes/auditoria?area=proyectos') ?>" class="btn btn-danger rounded-pill font-weight-bold px-4 mr-2" target="_blank">
+                    <i class="fas fa-file-pdf mr-2"></i> Reporte de Obras
+                </a>
+            <?php endif; ?>
+            
             <?php if (isset($_SESSION['usuario']) && in_array($_SESSION['usuario']['rol'], ['Administrador', 'Personal Alcaldia'])): ?>
                 <a href="<?= url('/proyectosadd') ?>" class="btn btn-warning rounded-pill font-weight-bold px-4">
                     <i class="fas fa-plus-circle mr-2"></i> Nuevo Proyecto

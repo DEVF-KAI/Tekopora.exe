@@ -1,84 +1,61 @@
 <?php
 
-require_once __DIR__ . '/../helpers/auth.php';
-
 class AnalisisPersonalController {
-
+    
     public function perfil() {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
-        require_login(); // 🔒 debe estar logueado
+        // Verificamos que el usuario esté logueado
+        require_login(); 
+
+        // Capturamos la ID guardada en la sesión por el login de Google
+        $idUsuario = $_SESSION['usuario']['idUsuario'] ?? null;
+
+        if (!$idUsuario) {
+            header("Location: " . url('/login'));
+            exit();
+        }
 
         require __DIR__ . '/../../config/database.php';
 
-        // 🔥 Usuario en sesión
-        $idUsuario = $_SESSION['usuario']['id'];
+        try {
+            // 1. Obtener datos básicos del usuario
+            $stmt = $conn->prepare("SELECT * FROM usuario WHERE idUsuario = ?");
+            $stmt->execute([$idUsuario]);
+            $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // =========================
-        // 👤 DATOS DEL USUARIO
-        // =========================
-        $stmt = $conn->prepare("
-            SELECT nombre, email, telefono, fechaRegistro
-            FROM usuario
-            WHERE idUsuario = ?
-        ");
-        $stmt->execute([$idUsuario]);
-        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+            // 2. Obtener sitios agregados por este usuario
+            $stmtSitios = $conn->prepare("SELECT nombre, fechaRegistro as fecha, estado FROM sitioTuristico WHERE idUsuario_FK = ?");
+            $stmtSitios->execute([$idUsuario]); // Corregido: flecha en lugar de punto
+            $sitios = $stmtSitios->fetchAll(PDO::FETCH_ASSOC);
 
-        // =========================
-        // 🏝️ SITIOS (PUBLICACIONES)
-        // =========================
-        $stmt = $conn->prepare("
-            SELECT 
-                titulo AS nombre,
-                fechaPublicacion AS fecha,
-                estado
-            FROM publicacion
-            WHERE idUsuario_FK = ?
-            ORDER BY fechaPublicacion DESC
-        ");
-        $stmt->execute([$idUsuario]);
-        $sitios = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // 3. Obtener reportes de proyectos
+            $stmtReportes = $conn->prepare("
+                SELECT p.nombreProyecto as proyecto, r.porcentajeAvance as avance, p.estado 
+                FROM reporteProyecto r
+                JOIN proyecto p ON r.idProyecto_FK = p.idProyecto
+                WHERE r.idUsuario_FK = ?
+            ");
+            $stmtReportes->execute([$idUsuario]);
+            $reportes = $stmtReportes->fetchAll(PDO::FETCH_ASSOC);
 
-        // =========================
-        // 🏗️ REPORTES DE PROYECTO
-        // =========================
-        $stmt = $conn->prepare("
-            SELECT 
-                p.nombreProyecto AS proyecto,
-                r.porcentajeAvance AS avance,
-                p.estado
-            FROM reporteProyecto r
-            INNER JOIN proyecto p ON r.idProyecto_FK = p.idProyecto
-            WHERE r.idUsuario_FK = ?
-            ORDER BY r.fechaReporte DESC
-        ");
-        $stmt->execute([$idUsuario]);
-        $reportes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // 4. Actividad reciente (bitácora)
+            $stmtActividad = $conn->prepare("SELECT accion as descripcion, fechaHora as fecha FROM bitacora WHERE idUsuario_FK = ? ORDER BY fechaHora DESC LIMIT 5");
+            $stmtActividad->execute([$idUsuario]);
+            $actividad = $stmtActividad->fetchAll(PDO::FETCH_ASSOC);
 
-        // =========================
-        // 📜 ACTIVIDAD (BITÁCORA)
-        // =========================
-        $stmt = $conn->prepare("
-            SELECT 
-                accion AS descripcion,
-                fechaHora AS fecha
-            FROM bitacora
-            WHERE idUsuario_FK = ?
-            ORDER BY fechaHora DESC
-            LIMIT 10
-        ");
-        $stmt->execute([$idUsuario]);
-        $actividad = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // Cargar la vista con el layout
+            ob_start();
+            require __DIR__ . '/../../views/analisis-personal.php';
+            $content = ob_get_clean();
 
-        // =========================
-        // 🎯 CARGAR VISTA
-        // =========================
-        ob_start();
-        include __DIR__ . '/../../views/analisis-personal.php';
-        $content = ob_get_clean();
+            require __DIR__ . '/../../views/layouts/app_layout.php';
 
-        $title = "Mi Perfil";
-
-        include __DIR__ . '/../../views/layouts/app_layout.php';
+        } catch (PDOException $e) {
+            error_log($e->getMessage());
+            die("Error al cargar el perfil de TekoPorã.");
+        }
     }
 }

@@ -1,0 +1,283 @@
+/* ==========================================================================
+   VARIABLES GLOBALES & RESET
+   ========================================================================== */
+:root {
+    --primary: #217F82;
+    --primary-glow: rgba(33, 127, 130, 0.6);
+    --secondary: #0f2027; 
+    --accent: #f39c12;
+    --text-light: #e0e0e0;
+    --transition: 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    --bg-light: #f4f7f6;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+/* ==========================================================================
+   HERO SECTION (BAILE DE LUCES)
+   ========================================================================== */
+.hero-modern {
+    background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    color: white;
+}
+
+#particles-js {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.hero-content {
+    z-index: 2;
+    position: relative;
+}
+
+.hero-title {
+    font-size: 4.5rem;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 25px;
+    color: #ffffff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+}
+
+.hero-title span {
+    color: #48c6ef;
+    background: -webkit-linear-gradient(45deg, #48c6ef, #6f86d6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 10px var(--primary-glow));
+}
+
+.hero-subtitle {
+    font-size: 1.25rem;
+    color: var(--text-light);
+    margin-bottom: 35px;
+    line-height: 1.7;
+    max-width: 90%;
+    font-weight: 300;
+}
+
+.btn-neon {
+    background: transparent;
+    color: #48c6ef;
+    border: 2px solid #48c6ef;
+    padding: 15px 35px;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    font-weight: 600;
+    transition: var(--transition);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 0 15px rgba(72, 198, 239, 0.3), inset 0 0 10px rgba(72, 198, 239, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-neon:hover {
+    background: #48c6ef;
+    color: #0f2027;
+    box-shadow: 0 0 25px rgba(72, 198, 239, 0.6), inset 0 0 15px rgba(255, 255, 255, 0.4);
+    transform: translateY(-3px);
+}
+
+.btn-outline-light {
+    margin-left: 15px;
+    border-color: rgba(255,255,255,0.3);
+    padding: 15px 35px;
+    border-radius: 50px;
+    color: white;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition);
+}
+
+.btn-outline-light:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* ==========================================================================
+   COMPOSICIÓN FLOTANTE (GLASSMORPHISM)
+   ========================================================================== */
+.floating-composition {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 20px;
+    position: absolute;
+    color: white;
+    box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+    animation: float 6s ease-in-out infinite;
+}
+
+.glass-1 { top: 10%; right: 5%; animation-delay: 0s; width: 250px; }
+.glass-2 { bottom: 15%; left: 0%; animation-delay: 2s; width: 220px; }
+.glass-3 { top: 40%; right: 40%; animation-delay: 4s; width: 280px; z-index: 3; background: rgba(33, 127, 130, 0.2); border: 1px solid var(--primary); box-shadow: 0 0 30px var(--primary-glow); }
+
+.glowing-orb {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, var(--primary) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: pulse 4s infinite alternate;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+}
+@keyframes pulse {
+    0% { transform: scale(0.8); opacity: 0.3; }
+    100% { transform: scale(1.2); opacity: 0.6; }
+}
+
+/* ==========================================================================
+   SECCIÓN 2: PILARES DE TEKOPORÃ (Fondo Blanco)
+   ========================================================================== */
+.values-section {
+    background: #ffffff;
+    color: #0f2027;
+    padding: 80px 0;
+    position: relative;
+}
+
+.value-box {
+    text-align: center;
+    padding: 20px;
+}
+
+.value-icon {
+    font-size: 3.5rem;
+    color: var(--primary);
+    margin-bottom: 15px;
+    text-shadow: 0 5px 15px rgba(33, 127, 130, 0.2);
+    transition: transform var(--transition);
+}
+
+.value-box:hover .value-icon {
+    transform: scale(1.1) translateY(-5px);
+}
+
+.value-label {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.value-text {
+    font-size: 0.95rem;
+    color: #666;
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   SECCIÓN 3: MÓDULOS (TARJETAS TILT 3D - Fondo Oscuro)
+   ========================================================================== */
+.modules-section { 
+    padding: 100px 0; 
+    background: linear-gradient(to bottom, #0f2027, #203a43); 
+    position: relative;
+}
+
+.module-card {
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 50px 30px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    transition: all 0.4s ease;
+    border: 1px solid rgba(255,255,255,0.05);
+    height: 100%;
+    transform-style: preserve-3d;
+}
+
+.module-icon {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: var(--bg-light); display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 25px; font-size: 2.5rem; color: var(--primary);
+    transform: translateZ(40px); transition: var(--transition);
+}
+
+.module-card:hover .module-icon {
+    background: var(--primary); color: white;
+    transform: translateZ(60px) scale(1.15);
+    box-shadow: 0 10px 20px var(--primary-glow);
+}
+
+.module-title { font-size: 1.6rem; font-weight: 700; color: var(--secondary); margin-bottom: 15px; transform: translateZ(30px); }
+.module-text { color: #666; font-size: 1rem; margin-bottom: 25px; transform: translateZ(20px); }
+.module-link { color: var(--primary); font-weight: 700; text-decoration: none; display: inline-block; transform: translateZ(30px); text-transform: uppercase; font-size: 0.9rem; }
+
+/* ==========================================================================
+   SECCIÓN 4: CÓMO FUNCIONA (Timeline)
+   ========================================================================== */
+.steps-section { padding: 100px 0; background: #f8f9fa; }
+
+.step-card {
+    background: white;
+    border-radius: 20px;
+    padding: 40px;
+    position: relative;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    z-index: 2;
+    transition: var(--transition);
+}
+
+.step-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(33, 127, 130, 0.15);
+}
+
+.step-number {
+    position: absolute;
+    top: -20px; right: -20px;
+    width: 60px; height: 60px;
+    background: var(--primary); color: white;
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; font-weight: bold;
+    box-shadow: 0 10px 20px var(--primary-glow);
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+@media (max-width: 991px) {
+    .hero-modern { text-align: center; padding: 100px 0 60px; }
+    .hero-title { font-size: 3.2rem; }
+    .btn-outline-light { margin-left: 0; margin-top: 15px; }
+    .floating-composition { height: 400px; margin-top: 40px; }
+    .glass-1 { top: 5%; right: 0; width: 200px; }
+    .glass-2 { bottom: 5%; left: 0; width: 200px; }
+    .glass-3 { top: 30%; right: 10%; width: 220px; }
+}

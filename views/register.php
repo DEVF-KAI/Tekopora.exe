@@ -1,179 +1,129 @@
-<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta | TekoPorã Bolivia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="stylesheet" href="<?= asset('css/register.css') ?>">
+</head>
+<body>
 
-    <div class="register-card">
+    <!-- FONDO PARALLAX -->
+    <div id="parallax-bg"></div>
 
-        <h2>
-            <?php if (!empty($_SESSION['error'])): ?>
-                <div class="alert alert-danger py-2 text-center" style="font-size: 0.85em; border-radius: 10px;">
-                    <i class="fa fa-exclamation-circle mr-1"></i> <?= htmlspecialchars($_SESSION['error']) ?>
+    <!-- TARJETA FIJA (SIN data-tilt) -->
+    <div class="auth-card text-center">
+        
+        <a href="<?= url('/') ?>">
+            <img src="<?= asset('imgs/logo_tekopora.png') ?>" alt="TekoPorã Bolivia" class="auth-logo">
+        </a>
+        
+        <h1 class="auth-title">Únete a TekoPorã</h1>
+        <p class="auth-subtitle">Regístrate como ciudadano y sé parte del cambio</p>
+
+        <?php if (!empty($_SESSION['error'])): ?>
+            <div class="alert alert-danger py-2 text-start small mb-4 shadow-sm" style="border-radius: 8px;">
+                <i class="fa fa-exclamation-triangle me-2"></i> <?= htmlspecialchars($_SESSION['error']) ?>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
+
+        <form action="<?= url('register') ?>" method="POST" class="text-start">
+            
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
+                    </div>
                 </div>
-                <?php unset($_SESSION['error']); ?>
+                <div class="col-md-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text"><i class="fas fa-user-tag"></i></span>
+                        <input type="text" name="appPaterno" class="form-control" placeholder="Apellido Paterno" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text text-muted"><i class="fas fa-user-tag"></i></span>
+                        <input type="text" name="appMaterno" class="form-control" placeholder="Ap. Materno (Opcional)">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group shadow-sm">
+                        <span class="input-group-text"><i class="fas fa-id-card"></i></span>
+                        <input type="text" name="ci" class="form-control" placeholder="Carnet de Identidad" required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text"><i class="fas fa-phone"></i></span>
+                    <input type="text" name="telefono" class="form-control" placeholder="Teléfono de contacto">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                    <input type="password" name="password" id="passwordInput" class="form-control" placeholder="Crea una contraseña segura" 
+                           pattern="(?=.*\d)(?=.*[A-Z])(?=.*[\W_]).{8,}" required>
+                </div>
+                
+                <div class="pwd-strength-container">
+                    <div class="pwd-bar-bg">
+                        <div class="pwd-bar-progress" id="strengthBar"></div>
+                    </div>
+                    <ul class="pwd-req-list">
+                        <li class="pwd-req-item invalid" id="reqLength"><i class="fas fa-circle"></i> 8+ Caracteres</li>
+                        <li class="pwd-req-item invalid" id="reqUpper"><i class="fas fa-circle"></i> 1 Mayúscula</li>
+                        <li class="pwd-req-item invalid" id="reqNumber"><i class="fas fa-circle"></i> 1 Número</li>
+                        <li class="pwd-req-item invalid" id="reqSymbol"><i class="fas fa-circle"></i> 1 Símbolo</li>
+                    </ul>
+                </div>
+            </div>
+
+            <?php if (isset($roles) && count($roles) > 0): ?>
+                <input type="hidden" name="rol" value="<?= $roles[0]['idRol'] ?>">
             <?php endif; ?>
-            <i class="fa fa-user-plus"></i> Crear Cuenta
-        </h2>
-
-        <form action="<?= url('register') ?>" method="POST">
-
-            <div class="row">
-                <div class="col-md-6 mb-3 position-relative">
-                    <i class="fa fa-user input-icon"></i>
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre" required>
-                </div>
-
-                <div class="col-md-6 mb-3 position-relative">
-                    <i class="fa fa-user input-icon"></i>
-                    <input type="text" name="appPaterno" class="form-control" placeholder="Apellido Paterno" required>
-                </div>
+            
+            <div class="d-flex justify-content-center mb-3 mt-3">
+                <div class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
             </div>
 
-            <div class="mb-3 position-relative">
-                <i class="fa fa-user input-icon"></i>
-                <input type="text" name="appMaterno" class="form-control" placeholder="Apellido Materno">
-            </div>
-
-            <div class="mb-3 position-relative">
-                <i class="fa fa-id-card input-icon"></i>
-                <input type="text" name="ci" class="form-control" placeholder="Cédula de Identidad" required>
-            </div>
-
-            <div class="mb-3 position-relative">
-                <i class="fa fa-envelope input-icon"></i>
-                <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
-            </div>
-
-            <div class="mb-3 position-relative">
-                <i class="fa fa-phone input-icon"></i>
-                <input type="text" name="telefono" class="form-control" placeholder="Teléfono">
-            </div>
-
-            <div class="mb-3">
-                <div class="position-relative">
-                    <i class="fa fa-lock input-icon"></i>
-                    <input type="password" name="password" class="form-control" placeholder="Contraseña"
-                        pattern="(?=.*\d)(?=.*[A-Z])(?=.*[\W_]).{8,}"
-                        title="Debe contener al menos 8 caracteres, una mayúscula, un número y un carácter especial."
-                        required>
-                </div>
-                <small class="text-muted d-block mt-1" style="font-size: 0.8em; margin-left: 5px;">
-                    * Mínimo 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial (ej: @!#$%).
-                </small>
-            </div>
-            <div class="mb-3">
-                <?php if (count($roles) === 1): ?>
-                    <div class="position-relative">
-                        <i class="fa fa-user-shield input-icon"></i>
-                        <input type="text" class="form-control" value="<?= $roles[0]['nombre'] ?>" readonly>
-                        <input type="hidden" name="rol" value="<?= $roles[0]['idRol'] ?>">
-                    </div>
-                    <small class="text-muted d-block mt-1" style="font-size: 0.8em; margin-left: 5px;">
-                        * Te registrarás con el perfil de Ciudadano.
-                    </small>
-                <?php else: ?>
-                    <div class="position-relative">
-                        <i class="fa fa-user-shield input-icon"></i>
-                        <select name="rol" class="form-control" required>
-                            <option value="">Seleccionar rol</option>
-                            <?php foreach ($roles as $r): ?>
-                                <option value="<?= $r['idRol'] ?>"><?= $r['nombre'] ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                <?php endif; ?>
-            </div>
-            <button type="submit" class="btn btn-register w-100">
-                Registrarse
+            <button type="submit" class="btn btn-primary-custom w-100 text-white shadow-sm">
+                Crear Mi Cuenta
             </button>
 
-            <div class="text-center mt-3">
-                <a href="<?= url('login') ?>" class="link-login">
-                    ¿Ya tienes cuenta? Inicia sesión
-                </a>
-            </div>
+            <div class="divider">o regístrate con</div>
 
+            <a href="<?= url('/auth/google') ?>" class="btn btn-google w-100 shadow-sm text-decoration-none">
+                <img src="https://www.google.com/favicon.ico" alt="Google" width="18"> 
+                Continuar con Google
+            </a>
+            
+            <div class="auth-links mt-4 text-center">
+                <p class="mb-0 small">¿Ya tienes una cuenta? <a href="<?= url('/login') ?>">Inicia sesión aquí</a></p>
+            </div>
         </form>
     </div>
 
-</div>
+    <!-- Script Propio -->
+    <script src="<?= asset('js/register.js') ?>"></script>
 
-<!-- ESTILOS -->
-<style>
-    body {
-        background: #F5F7F6;
-    }
-
-    /* Card */
-    .register-card {
-        background: #fff;
-        padding: 2.5rem;
-        border-radius: 16px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        width: 100%;
-        max-width: 500px;
-        animation: fadeIn 0.8s ease-in-out;
-    }
-
-    /* Título */
-    .register-card h2 {
-        font-weight: 700;
-        margin-bottom: 1.5rem;
-        color: #2A6F97;
-        text-align: center;
-    }
-
-    /* Inputs */
-    .form-control {
-        border-radius: 10px;
-        padding-left: 2.5rem;
-        border: 1px solid #ddd;
-    }
-
-    /* Iconos */
-    .input-icon {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #2E7D6B;
-    }
-
-    /* Botón */
-    .btn-register {
-        border-radius: 10px;
-        font-weight: bold;
-        background: #2E7D6B;
-        color: #fff;
-        transition: 0.3s;
-    }
-
-    .btn-register:hover {
-        background: #25675a;
-        color: #fff;
-    }
-
-    /* Link */
-    .link-login {
-        color: #2A6F97;
-        text-decoration: none;
-    }
-
-    .link-login:hover {
-        text-decoration: underline;
-    }
-
-    select.form-control {
-        padding-left: 2.5rem;
-    }
-
-    /* Animación */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(-15px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-</style>
+</body>
+</html>

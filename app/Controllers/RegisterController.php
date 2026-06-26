@@ -3,8 +3,6 @@
 class RegisterController {
     
     public function register() {
-        // 1. Captura la vista
-        ob_start();
         require __DIR__ . '/../../config/database.php';
 
         // 🔥 FILTRAMOS: Solo traemos el rol de Ciudadano
@@ -12,11 +10,8 @@ class RegisterController {
         $stmt->execute(['Ciudadano']);
         $roles = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
+        // Cargamos la vista directamente (igual que en el login)
         require __DIR__ . '/../../views/register.php';
-        $content = ob_get_clean();
-
-        // 2. Carga el layout
-        require __DIR__ . '/../../views/layouts/app_layout.php';
     }
 
     public function login() {

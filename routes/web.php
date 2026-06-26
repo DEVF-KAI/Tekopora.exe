@@ -18,6 +18,30 @@ return [
     ['method' => 'GET',  'path' => '/logout',           'target' => 'AuthController@logout'],
     ['method' => 'GET',  'path' => '/register',         'target' => 'RegisterController@register'],
     ['method' => 'POST', 'path' => '/register',         'target' => 'RegisterController@store'],
+
+    // ==========================================
+    // VERIFICAION CON GOOGLE
+    // ==========================================
+    ['method' => 'GET',  'path' => '/auth/google',          'target' => 'GoogleAuthController@redirectToGoogle'],
+    ['method' => 'GET',  'path' => '/auth/google/callback', 'target' => 'GoogleAuthController@handleGoogleCallback'],
+
+    // ==========================================
+    // VERIFICACIÓN DE IDENTIDAD (CÓDIGO POR EMAIL)
+    // ==========================================
+    ['method' => 'GET',  'path' => '/verificar',            'target' => 'VerificationController@index'],
+    ['method' => 'GET',  'path' => '/verificar/enviar',     'target' => 'VerificationController@enviar'],
+    ['method' => 'POST', 'path' => '/verificar/validar',    'target' => 'VerificationController@validar'],
+
+    // ==========================================
+    // RECUPERACIÓN DE CONTRASEÑA
+    // ==========================================
+    ['method' => 'GET',  'path' => '/recuperar',            'target' => 'PasswordResetController@index'],
+    ['method' => 'POST', 'path' => '/recuperar/enviar',     'target' => 'PasswordResetController@enviarCodigo'],
+    ['method' => 'GET',  'path' => '/recuperar/verificar',  'target' => 'PasswordResetController@mostrarVerificacion'],
+    ['method' => 'POST', 'path' => '/recuperar/verificar',  'target' => 'PasswordResetController@verificarCodigo'],
+    ['method' => 'GET',  'path' => '/recuperar/nueva',      'target' => 'PasswordResetController@mostrarNueva'],
+    ['method' => 'POST', 'path' => '/recuperar/actualizar', 'target' => 'PasswordResetController@actualizarPassword'],
+
     // ==========================================
     // ADMINISTRACIÓN Y USUARIOS
     // ==========================================
@@ -45,6 +69,7 @@ return [
     ['method' => 'POST', 'path' => '/proyectos/reportar',    'target' => 'ProyectosController@guardarReporte'],
     ['method' => 'GET',  'path' => '/proyectos/detalle',     'target' => 'ProyectosController@detalleProyecto'],
     ['method' => 'POST', 'path' => '/proyectos/evaluar',     'target' => 'ProyectosController@evaluarEmpresa'],
+
     // ==========================================
     // FORO Y COMENTARIOS
     // ==========================================
@@ -55,6 +80,7 @@ return [
     ['method' => 'POST', 'path' => '/foro/comentar',            'target' => 'ForoController@comentar'],
     ['method' => 'POST', 'path' => '/foro/votar',               'target' => 'ForoController@votar'],
     ['method' => 'GET',  'path' => '/foro/eliminar_comentario', 'target' => 'ForoController@eliminarComentario'],
+
     // ==========================================
     // TURISMO
     // ==========================================
@@ -67,4 +93,14 @@ return [
     ['method' => 'POST', 'path' => '/turismo/procesar',             'target' => 'TurismoController@procesarPropuesta'],
     ['method' => 'GET', 'path'  => '/turismo/mis-propuestas',       'target' => 'TurismoController@misPropuestas'],
     ['method' => 'GET', 'path' => '/municipios',                    'target' => 'MunicipiosController@municipios'],
+
+    // ==========================================
+    // REPORTES (SOLO ADMIN)
+    // ==========================================
+    ['method' => 'GET',  'path' => '/reportes/auditoria',  'target' => 'ReportesController@generarAuditoria'],
+
+    // ==========================================
+    // CHATBOT 
+    // ==========================================
+    ['method' => 'GET','path' => '/chatboy','target' => 'ChatboyController@index'],
 ];

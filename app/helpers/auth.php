@@ -5,7 +5,8 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 function require_login() {
-    if (empty($_SESSION['usuario'])) {
+    // EL FIX: Verificamos que la sesión exista y que tenga la llave correcta 'idUsuario'
+    if (empty($_SESSION['usuario']) || !isset($_SESSION['usuario']['idUsuario'])) {
         header("Location: " . url('/login'));
         exit();
     }

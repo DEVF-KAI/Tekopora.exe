@@ -4,14 +4,10 @@ class AuthController
     // Mostrar formulario
     public function login()
     {
-     
         require __DIR__ . '/../../views/login.php';
-        
-
     }
 
     // Procesar login
-   // Procesar login
     public function authenticate()
     {
         session_start();
@@ -57,9 +53,9 @@ class AuthController
             }
             // ==========================================
 
-            // 🔥 Guardar sesión con rol
+            // 🔥 Guardar sesión con rol (ESTANDARIZADO: idUsuario)
             $_SESSION['usuario'] = [
-                'id' => $usuario['idUsuario'],
+                'idUsuario' => $usuario['idUsuario'], // <-- EL FIX ESTÁ AQUÍ
                 'codigo'=> $usuario['codigoUsuario'],
                 'nombre' => $usuario['nombre'],
                 'email' => $usuario['email'],
@@ -81,6 +77,7 @@ class AuthController
             exit();
         }
     }
+    
     // Cerrar sesión
     public function logout()
     {

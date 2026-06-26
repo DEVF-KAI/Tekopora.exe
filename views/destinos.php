@@ -118,9 +118,7 @@ ob_start();
     </div>
 </div>
 
-
 <script>
-
 // 1. BASE DE DATOS (Tus 20 provincias intactas)
 const provinciasDB = [
     { id: 1, nombre: "Abel Iturralde", capital: "Ixiamas", region: "Amazonía", imagen: "iturralde.jpg", descripcion: "La provincia más extensa y amazónica del norte paceño." },
@@ -154,7 +152,6 @@ let ultimaRegion = "todos";
 function renderizarProvincias(datos) {
     const contenedor = document.getElementById('contenedorProvincias');
     let html = '';
-        
 
     if(datos.length === 0) {
         contenedor.innerHTML = `
@@ -192,7 +189,6 @@ function renderizarProvincias(datos) {
             </div>
         `;
     });
-    
 
     contenedor.innerHTML = html;
 }
@@ -225,7 +221,7 @@ function aplicarFiltros() {
     }, 250); // 250ms de gracia
 }
 
-unction verMunicipios(idProvincia, nombreProvincia) {
+function verMunicipios(idProvincia, nombreProvincia) {
     window.location.href = "<?= url('/municipios?prov=') ?>" + idProvincia;
 }
 

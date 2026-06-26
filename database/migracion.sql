@@ -260,6 +260,25 @@ CREATE TABLE IF NOT EXISTS voto (
     FOREIGN KEY (idComentario_FK) REFERENCES comentario(idComentario)
 );
 
+-- ==========================================================
+-- MODIFICACIONES PARA INCLUIR INICIO DE SESION CON GOOGLE
+-- ==========================================================
+
+-- Ajustes para el registro inicial con Google 
+ALTER TABLE usuario 
+MODIFY ci VARCHAR(15) NULL,
+MODIFY appPaterno VARCHAR(50) NULL,
+MODIFY passwordHash VARCHAR(255) NULL;
+
+-- Añadir el identificador único de Google
+ALTER TABLE usuario 
+ADD COLUMN google_id VARCHAR(100) NULL UNIQUE AFTER idUsuario;
+
+-- Añadir campos para verificación en dos pasos (2FA)
+ALTER TABLE usuario 
+ADD COLUMN codigo_verificacion VARCHAR(10) NULL, 
+ADD COLUMN expiracion_codigo DATETIME NULL;
+
 INSERT INTO categoriaturistica (idCategoria, nombre) VALUES
 (1, 'General'),
 (2, 'Avance de Obras Públicas'),

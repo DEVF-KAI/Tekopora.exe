@@ -1,8 +1,35 @@
-# Ignorar las imágenes subidas por los usuarios
+# ==========================================
+# IGNORAR PARA LA IA (Python)
+# ==========================================
+app/Scripts/venv/
+app/Scripts/__pycache__/
+*.pyc
+
+# ==========================================
+# IGNORAR CONTENIDO MULTIMEDIA DINÁMICO
+# ==========================================
 public/imgs/Foro_imgs/*
 public/imgs/Proyectos_imgs/*
 public/imgs/Turismo_imgs/*
+!public/imgs/Foro_imgs/.gitkeep
+!public/imgs/Proyectos_imgs/.gitkeep
+!public/imgs/Turismo_imgs/.gitkeep
 
-# Ignorar carpetas del sistema operativo
+================================================================
+# Ignorar todas las imágenes en la carpeta pública de Tekoporã
+================================================================
+
+/public/imgs/*
+
+# ==========================================
+# IGNORAR DEPENDENCIAS Y CREDENCIALES (PHP)
+# ==========================================
+/vendor/
+.env
+*.log
+
+# ==========================================
+# IGNORAR BASURA DEL SISTEMA OPERATIVO
+# ==========================================
 .DS_Store
 Thumbs.db

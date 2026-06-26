@@ -24,6 +24,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <?php include __DIR__ . '/../components/footer.php'; ?>
 
+    <?php include __DIR__ . '/../components/chatbot.php'; ?>
+
 </body>
 
 </html>
