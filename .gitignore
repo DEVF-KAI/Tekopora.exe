@@ -6,6 +6,3 @@ public/imgs/Turismo_imgs/*
 # Ignorar carpetas del sistema operativo
 .DS_Store
 Thumbs.db
-
-# Ignorar la carpeta vendor (dependencias de composer)
-/vendor/
