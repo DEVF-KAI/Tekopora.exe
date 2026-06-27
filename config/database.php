@@ -1,17 +1,23 @@
 <?php
-$host = "127.0.0.1";
+// config/database.php
+$host = "db";
+$port = "3306";
 $db   = "tekopora_db";
 $user = "root";
-$pass = ""; // tu contraseña si tienes
+$pass = ""; 
+$charset = "utf8mb4";
 
 try {
-    $conn = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=$charset";
+    
+    $options = [
+        PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_EMULATE_PREPARES   => false,
+    ];
 
-    // Depuración en consola del navegador
-    echo "<script>console.log('Conexión a la base de datos exitosa');</script>";
+    $conn = new PDO($dsn, $user, $pass, $options);
+
 } catch (PDOException $e) {
-    // Depuración en consola del navegador con error
-    echo "<script>console.error('Error de conexión: " . addslashes($e->getMessage()) . "');</script>";
-    die("Error de conexión: " . $e->getMessage());
+    die("ERROR DE CONEXIÓN A BD: " . $e->getMessage() . " | Host: " . $host . " | DB: " . $db);
 }

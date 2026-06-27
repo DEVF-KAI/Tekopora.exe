@@ -26,7 +26,6 @@
                             <a href="<?= url('/proyectosadd') ?>" class="dropdown-item text-warning font-weight-bold">
                                 <i class="fa fa-plus-circle"></i> Añadir Proyecto
                             </a>
-                            </a>
                             <a href="<?= url('/empresas/add') ?>" class="dropdown-item text-warning font-weight-bold">
                                 <i class="fa fa-building mr-2"></i> Registrar Empresa
                             </a>
@@ -38,8 +37,6 @@
                                 <i class="fa fa-hard-hat"></i> Mis Obras Asignadas
                             </a>
                         <?php endif; ?>
-
-                        
                     </div>
                 </div>
                 
@@ -86,23 +83,17 @@
                     }
                     ?>
 
-                    <div class="nav-item dropdown ml-2">
-                        <a href="#" class="nav-link text-white px-3" data-toggle="dropdown">
-                            <i class="fa fa-bell"></i>
-                            <span class="badge badge-warning rounded-circle position-absolute" style="top: 5px; right: 15px; font-size: 0.6rem;">2</span>
+                    <!-- ==============================================
+                         BOTÓN DE NOTIFICACIONES (Abre el Modal)
+                    =============================================== -->
+                    <div class="nav-item ml-2">
+                        <a href="#" class="nav-link text-white px-3 position-relative" data-toggle="modal" data-target="#notificacionesModal" onclick="marcarNotificacionesLeidas()">
+                            <i class="fa fa-bell" style="font-size: 1.2rem;"></i>
+                            <span class="badge badge-warning rounded-circle position-absolute" id="notifCount" style="top: 0px; right: 5px; font-size: 0.65rem; display: none; box-shadow: 0 0 5px rgba(0,0,0,0.5);">0</span>
                         </a>
-                        <div class="dropdown-menu border-0 rounded-0 dropdown-menu-right shadow-lg mt-2" style="background: #217F82; min-width: 250px;">
-                            <span class="dropdown-item text-white-50 small font-weight-bold">Notificaciones Recientes</span>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" class="dropdown-item text-white small">
-                                <i class="fa fa-hard-hat text-warning mr-2"></i> Nuevo reporte en tu obra asignada.
-                            </a>
-                            <a href="#" class="dropdown-item text-white small">
-                                <i class="fa fa-star text-info mr-2"></i> ¡Has ganado +10 de Karma!
-                            </a>
-                        </div>
                     </div>
 
+                    <!-- Menú de Usuario -->
                     <div class="nav-item dropdown ml-1">
                         <a href="#" class="nav-link dropdown-toggle d-flex align-items-center text-white px-3 py-1 rounded-pill" data-toggle="dropdown" style="background-color: rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.2);">
                             <img src="<?= asset('imgs/' . $insignia) ?>" alt="Nivel" class="mr-2" style="width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); transform: scale(3.3); transform-origin: center;">
@@ -143,9 +134,6 @@
                                 <a href="<?= url('/adminpanel') ?>" class="dropdown-item text-warning font-weight-bold">
                                     <i class="fa fa-cog mr-2"></i> Panel Admin
                                 </a>
-                                <a href="<?= url('/usuarios') ?>" class="dropdown-item text-warning font-weight-bold">
-                                    <i class="fa fa-users mr-2"></i> Gestión Usuarios
-                                </a>
                             <?php endif; ?>
 
                             <div class="dropdown-divider"></div>
@@ -172,3 +160,127 @@
         </div>
     </div>
 </nav>
+
+<!-- ==============================================
+     MODAL DE NOTIFICACIONES (Ventana Flotante)
+=============================================== -->
+<?php if (isset($_SESSION['usuario'])): ?>
+<div class="modal fade" id="notificacionesModal" tabindex="-1" role="dialog" aria-labelledby="notificacionesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            
+            <div class="modal-header text-white" style="background-color: #1A6A6D; border-bottom: 4px solid #217F82;">
+                <h5 class="modal-title font-weight-bold" id="notificacionesModalLabel">
+                    <i class="fa fa-bell mr-2 text-warning"></i> Centro de Notificaciones
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close" style="opacity: 0.9; text-shadow: none;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            
+            <div class="modal-body p-0" style="background-color: #f4f7f6; min-height: 300px;">
+                <!-- Contenedor inyectado por JS -->
+                <div id="modalNotifBox">
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa fa-spinner fa-spin fa-3x mb-3"></i>
+                        <h5>Cargando tus notificaciones...</h5>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal-footer bg-white border-top-0">
+                <button type="button" class="btn btn-secondary rounded-pill px-4 shadow-sm" data-dismiss="modal">Cerrar ventana</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ==============================================
+     MOTOR JS DE NOTIFICACIONES (Encapsulado)
+=============================================== -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarNotificaciones();
+    });
+
+    function cargarNotificaciones() {
+        fetch('<?= url("/notificaciones/obtener") ?>') 
+        .then(res => res.json())
+        .then(data => {
+            const countBadge = document.getElementById('notifCount');
+            const notifBox = document.getElementById('modalNotifBox');
+            
+            if(!data || !data.data) return;
+
+            // 1. Mostrar/Ocultar el globito de conteo
+            if (data.count > 0) {
+                countBadge.innerText = data.count;
+                countBadge.style.display = 'inline-block';
+            } else {
+                countBadge.style.display = 'none';
+            }
+
+            // 2. Armar la interfaz dentro del Modal
+            if (data.data.length === 0) {
+                notifBox.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fa fa-bell-slash fa-4x mb-3 text-light"></i>
+                        <h5 class="font-weight-bold">Estás al día</h5>
+                        <p>No tienes notificaciones nuevas por el momento.</p>
+                    </div>`;
+            } else {
+                let html = '<div class="list-group list-group-flush">';
+                
+                data.data.forEach(n => {
+                    // Estilos dinámicos para el Modal
+                    const bgClass = n.leida ? 'bg-white' : 'bg-light';
+                    const borderClass = n.leida ? '' : 'border-left border-warning';
+                    const iconColor = n.leida ? 'text-secondary' : 'text-warning';
+                    const fwClass = n.leida ? 'font-weight-normal text-secondary' : 'font-weight-bold text-dark';
+                    
+                    // Mostramos la fecha completa ya que ahora hay espacio
+                    const fechaCompleta = new Date(n.fechaCreacion).toLocaleString('es-ES', { 
+                        day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
+                    });
+
+                    html += `
+                        <div class="list-group-item list-group-item-action py-4 ${bgClass}" style="border-bottom: 1px solid #eaeaea; ${n.leida ? '' : 'border-left: 4px solid #ffc107 !important;'}">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0 ${fwClass}" style="font-size: 1.1rem;">
+                                    <i class="fa fa-info-circle ${iconColor} mr-2"></i>${n.titulo}
+                                </h5>
+                                <small class="text-muted font-weight-bold"><i class="fa fa-clock mr-1"></i>${fechaCompleta}</small>
+                            </div>
+                            <p class="mb-0 ml-4 pl-1" style="font-size: 0.95rem; color: #555; line-height: 1.5;">${n.mensaje}</p>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                notifBox.innerHTML = html;
+            }
+        })
+        .catch(error => console.error("Error cargando notificaciones:", error));
+    }
+
+    function marcarNotificacionesLeidas() {
+        const countBadge = document.getElementById('notifCount');
+        
+        // Si el globo está visible (hay notificaciones sin leer), avisamos al backend
+        if (countBadge.style.display !== 'none') {
+            fetch('<?= url("/notificaciones/leer") ?>', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    countBadge.style.display = 'none';
+                    countBadge.innerText = '0';
+                    // Recargamos el contenido del Modal para quitar los estilos de "no leído"
+                    setTimeout(cargarNotificaciones, 400); 
+                }
+            })
+            .catch(error => console.error("Error marcando como leídas:", error));
+        }
+    }
+</script>
+<?php endif; ?>

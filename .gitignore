@@ -15,12 +15,6 @@ public/imgs/Turismo_imgs/*
 !public/imgs/Proyectos_imgs/.gitkeep
 !public/imgs/Turismo_imgs/.gitkeep
 
-================================================================
-# Ignorar todas las imágenes en la carpeta pública de Tekoporã
-================================================================
-
-/public/imgs/*
-
 # ==========================================
 # IGNORAR DEPENDENCIAS Y CREDENCIALES (PHP)
 # ==========================================

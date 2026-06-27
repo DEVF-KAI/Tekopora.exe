@@ -1,44 +1,55 @@
+<!-- Botón Flotante Neumórfico -->
 <a href="chatboy" 
    id="btn-abrir-chat" 
-   style="position: fixed; bottom: 20px; right: 20px; background-color: #217F82; color: white; padding: 12px 20px; border-radius: 50px; text-decoration: none; z-index: 99999; display: flex; align-items: center; font-weight: bold;">
-    <i class="fas fa-comment-dots" style="margin-right: 10px;"></i>
-    Hablar con WYRM
+   class="btn-flotante-teko"
+   title="Hablar con TEKO">
+    <div class="icon-container">
+        <i class="fas fa-comment-dots"></i>
+    </div>
+    <span class="text-container">Hablar con TEKO</span>
 </a>
 
-<link href="https://cdn.jsdelivr.net/npm/@n8n/chat/style.css" rel="stylesheet" />
-<div id="n8n-chat"></div>
-
-<script>
-    // ESTA FUNCIÓN VA POR FUERA PARA QUE EL ONCLICK SIEMPRE LA ENCUENTRE
-    window.chatInstance = null;// Variable global para almacenar la instancia del chat
-
-    function triggerChat() {// Función para abrir el chat, se llama desde el botón
-        if (window.chatInstance) {// Si la instancia ya está lista, la abrimos
-            window.chatInstance.toggle();
-        } else {// Si no, mostramos un mensaje de alerta (esto es temporal, se puede mejorar)
-            alert("AHORA TOCA PONER EL N8N ACA PI PI PI");
-            console.log("Esperando instancia de n8n...");
-        }
-    }
-</script>
-
-<script type="module">// Cargamos el módulo de n8n para crear el chat, esto se hace de forma asíncrona para no bloquear la carga de la página
-    import { createChat } from 'https://cdn.jsdelivr.net/npm/@n8n/chat/index.current.js';
-
-    // Intentamos cargar n8n sin bloquear nada
-    createChat({// Configuración del chat, aquí se pueden agregar más opciones como estilos personalizados, mensajes de bienvenida, etc.    
-        webhookUrl: 'http://localhost:5678/webhook-test/asistente',
-        mode: 'window',
-        showWelcomeScreen: true,
-        i18n: { en: { title: 'Asistente WYRM' } }
-    }).then(res => {
-        window.chatInstance = res;
-    }).catch(err => {
-        console.warn("n8n no disponible.");
-    });
-</script>
-
 <style>
-    /* Ocultamos la burbuja que n8n crea por defecto */
-    .n8n-chat-button { display: none !important; }
+    .btn-flotante-teko {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background: linear-gradient(135deg, #1A6A6D 0%, #2A8C8F 100%);
+        color: white;
+        padding: 10px 22px 10px 10px;
+        border-radius: 50px;
+        text-decoration: none;
+        z-index: 99999;
+        display: flex;
+        align-items: center;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(26, 106, 109, 0.4);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        border: 2px solid rgba(255,255,255,0.2);
+    }
+
+    .btn-flotante-teko:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 15px 35px rgba(26, 106, 109, 0.5);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-flotante-teko .icon-container {
+        background: white;
+        color: #1A6A6D;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        font-size: 1.1rem;
+    }
+
+    .btn-flotante-teko .text-container {
+        letter-spacing: 0.5px;
+    }
 </style>

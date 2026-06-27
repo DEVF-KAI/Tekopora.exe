@@ -12,6 +12,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <?php include __DIR__ . '/../components/header.php'; ?>
     
     <link rel="stylesheet" href="<?= asset('css/sidebar.css') ?>">
+    
+    <?= $extraCss ?? '' ?>
 </head>
 
 <body>
@@ -22,10 +24,12 @@ if (session_status() === PHP_SESSION_NONE) {
         <?= $content ?>
     </div>
 
-    <?php include __DIR__ . '/../components/footer.php'; ?>
+    <?php if (!isset($ocultar_footer) || !$ocultar_footer): ?>
+        <?php include __DIR__ . '/../components/footer.php'; ?>
+        <?php include __DIR__ . '/../components/chatbot.php'; ?>
+    <?php endif; ?>
 
-    <?php include __DIR__ . '/../components/chatbot.php'; ?>
-
+    <?= $extraJs ?? '' ?>
 </body>
 
 </html>

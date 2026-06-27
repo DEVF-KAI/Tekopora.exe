@@ -1,0 +1,175 @@
+/* =========================================
+   ESTILOS DEL FORO TEKOPORÃ - UI MODERNA
+========================================= */
+
+/* Fondo general para dar contraste a las tarjetas de publicación */
+body {
+    background-color: #f0f2f5; 
+}
+
+/* Colores corporativos */
+.text-teko { color: #1A6A6D !important; }
+.bg-teko { background-color: #1A6A6D !important; }
+
+/* Cabecera del foro */
+.foro-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #eaeaea;
+}
+
+.foro-title {
+    color: #1A6A6D;
+    letter-spacing: -0.5px;
+}
+
+/* Tarjeta de Crear Publicación */
+.create-post-card {
+    background-color: #ffffff;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.04) !important;
+}
+
+.avatar-circle {
+    width: 45px; 
+    height: 45px; 
+    background: linear-gradient(135deg, #217F82 0%, #1A6A6D 100%);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.post-input {
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.post-input:focus {
+    box-shadow: 0 0 0 3px rgba(33, 127, 130, 0.2) !important;
+    background-color: #ffffff !important;
+    border: 1px solid #217F82 !important;
+}
+
+.btn-publish {
+    background-color: #ffc107;
+    color: #333;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-publish:hover {
+    background-color: #ffb300;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3) !important;
+}
+
+/* Tarjetas de Publicaciones (Estilo Feed) */
+.post-card {
+    background-color: #ffffff;
+    border-radius: 12px !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important;
+}
+
+/* Etiquetas de Categoría dinámicas */
+.badge-teko-category {
+    background-color: #e0f2f1;
+    color: #00796b;
+    padding: 0.4em 0.8em;
+    font-size: 0.75rem;
+    border-radius: 20px;
+    border: 1px solid #b2dfdb;
+}
+
+/* LA MAGIA DEL "VER MÁS..." */
+.content-truncate {
+    display: -webkit-box;
+    -webkit-line-clamp: 4; /* Número de líneas antes de cortar */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 0.2rem;
+    transition: max-height 0.3s ease;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: #2c3e50;
+}
+
+.content-truncate.expanded {
+    -webkit-line-clamp: unset;
+}
+
+.ver-mas-btn {
+    font-size: 0.95rem;
+    text-decoration: none !important;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.ver-mas-btn:hover {
+    text-decoration: underline !important;
+}
+
+/* Votos Laterales */
+.vote-sidebar {
+    width: 65px; 
+    min-width: 65px;
+    background-color: #fcfcfc;
+}
+
+.vote-btn {
+    color: #b0b7bd;
+    transition: all 0.2s ease;
+    line-height: 1;
+}
+
+.vote-btn:hover {
+    color: #1A6A6D !important;
+    transform: scale(1.3);
+}
+
+.vote-count {
+    color: #1A6A6D;
+    font-size: 1.3rem;
+}
+
+/* Botones de acción del post */
+.action-btn {
+    background-color: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.action-btn:hover {
+    background-color: #e2e6ea !important;
+    color: #1A6A6D !important;
+}
+
+/* Sección de Comentarios */
+.comments-section {
+    background-color: #f8f9fa !important;
+}
+
+.comment-item {
+    border-left: 3px solid #217F82 !important;
+    transition: background-color 0.2s ease;
+}
+
+.comment-item:hover {
+    background-color: #fdfdfd !important;
+}
+
+.comment-vote-controls button {
+    transition: color 0.2s;
+}
+
+.comment-vote-controls button:hover {
+    color: #217F82 !important;
+}

@@ -134,6 +134,15 @@ class PasswordResetController {
             $stmt = $conn->prepare("UPDATE usuario SET passwordHash = ?, codigo_verificacion = NULL, expiracion_codigo = NULL WHERE email = ?");
             $stmt->execute([$hash, $email]);
 
+            // REGISTRO EN BITÁCORA (Recuperación Exitosa)
+            $stmtUser = $conn->prepare("SELECT idUsuario FROM usuario WHERE email = ?");
+            $stmtUser->execute([$email]);
+            $idUsuario = $stmtUser->fetchColumn();
+
+            if ($idUsuario && function_exists('registrarActividad')) {
+                registrarActividad($idUsuario, "Restableció su contraseña mediante código de verificación al correo");
+            }
+
             // Limpiar variables de sesión de recuperación
             unset($_SESSION['reset_email'], $_SESSION['reset_verified']);
 

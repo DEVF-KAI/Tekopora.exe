@@ -62,6 +62,8 @@ CREATE TABLE IF NOT EXISTS usuario (
     passwordHash VARCHAR(255) NOT NULL,
     karmaTotal INT DEFAULT 0,
     estado ENUM('Activo', 'Inactivo', 'Suspendido') DEFAULT 'Activo',
+    failedLoginAttempts INT NOT NULL DEFAULT 0,
+    bloqueado TINYINT(1) NOT NULL DEFAULT 0,
     fechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # servidor web principal (PHP 8.3 + Apache + Python)
+  web:
+    build: .
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+      - n8n
+
+  # Base de Datos (MariaDB)
+  db:
+    image: mariadb:10.11
+    environment:
+      MYSQL_ROOT_PASSWORD: '' 
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: tekopora_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # n8n
+  n8n:
+    image: n8nio/n8n:latest
+    ports:
+      - "5678:5678"
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+# Volúmenes persistentes para evitar perdidas
+volumes:
+  db_data:
+  n8n_data:

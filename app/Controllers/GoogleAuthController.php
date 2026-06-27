@@ -3,14 +3,14 @@
 class GoogleAuthController {
     
     // ==========================================
-    // 1. CONFIGURACIÓN DE CREDENCIALES
+    // CONFIGURACIÓN DE CREDENCIALES
     // ==========================================
-    private $clientId = 'tuki';
-    private $clientSecret = 'tuki';
-    private $redirectUri = 'http://localhost/Tekopora_F/auth/google/callback';
+    private $clientId = '949490933707-dm44tpauiedn8bt4bk1uqid4me8hhvqr.apps.googleusercontent.com';
+    private $clientSecret = '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';
+    private $redirectUri = 'http://localhost/auth/google/callback';
 
     // ==========================================
-    // 2. REDIRIGIR A GOOGLE
+    // REDIRIGIR A GOOGLE
     // ==========================================
     public function redirectToGoogle() {
         $url = "https://accounts.google.com/o/oauth2/v2/auth?" . http_build_query([
@@ -26,7 +26,7 @@ class GoogleAuthController {
     }
 
     // ==========================================
-    // 3. RECIBIR RESPUESTA DE GOOGLE
+    // RECIBIR RESPUESTA DE GOOGLE
     // ==========================================
     public function handleGoogleCallback() {
         if (session_status() === PHP_SESSION_NONE) {
@@ -96,7 +96,7 @@ class GoogleAuthController {
     }
 
     // ==========================================
-    // INTEGRACIÓN CON TU MODELO (BD)
+    // INTEGRACIÓN AL MODELO DE LA BASE DE DATOS
     // ==========================================
     private function loginOrRegisterUser($googleUser) {
         if (session_status() === PHP_SESSION_NONE) {
@@ -143,7 +143,7 @@ class GoogleAuthController {
                 ];
 
             } else {
-                // EL USUARIO ES NUEVO: Lo registramos al vuelo
+                // REGISTRO DE USUARIO NUEVO
                 $passwordFalsa = bin2hex(random_bytes(16));
                 $hashArgon = password_hash($passwordFalsa, PASSWORD_ARGON2ID);
                 $codigoUsuario = 'USR-' . strtoupper(substr(uniqid(), -8));
@@ -174,6 +174,12 @@ class GoogleAuthController {
                     'email' => $email,
                     'rol' => 'Ciudadano'
                 ];
+            }
+
+            // REGISTRO EN BITÁCORA (Login con Google exitoso)
+            if (function_exists('registrarActividad')) {
+                $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                registrarActividad($idUsr, "Inició sesión en el sistema mediante cuenta de Google");
             }
 
             // ¡Adentro! Redirigimos al inicio de la aplicación

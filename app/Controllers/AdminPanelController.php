@@ -4,13 +4,11 @@ require_once __DIR__ . '/../helpers/auth.php';
 
 class AdminPanelController
 {
-
     public function index()
     {
-        require_admin(); // 🔥 SOLO ADMIN ENTRA
+        require_admin(); 
         require __DIR__ . '/../../config/database.php';
 
-        // 🔥 CONSULTA CON ROL
         $stmt = $conn->query("
             SELECT 
                 u.*, 
@@ -31,48 +29,52 @@ class AdminPanelController
         include __DIR__ . '/../../views/layouts/app_layout.php';
     }
 
-    // 🔥 MÉTODO PARA SUSPENDER USUARIO
     public function suspenderUsuario()
     {
         require_admin();
         require __DIR__ . '/../../config/database.php';
 
-        //  CAMBIO: Buscamos 'codigo' que es lo que manda la vista
         if (isset($_GET['codigo'])) {
             $codigo = $_GET['codigo'];
 
-            //  CAMBIO: UPDATE usando codigoUsuario para mantener la seguridad
             $stmt = $conn->prepare("UPDATE usuario SET estado = 'Suspendido' WHERE codigoUsuario = :codigo");
             $stmt->bindParam(':codigo', $codigo, PDO::PARAM_STR);
             $stmt->execute();
+
+            //  REGISTRO EN BITÁCORA (Suspender)
+            if (function_exists('registrarActividad')) {
+                $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                registrarActividad($idUsr, "Suspendió el acceso al sistema del usuario con código: " . $codigo);
+            }
         }
 
         header("Location: " . url('adminpanel'));
         exit;
     }
 
-    // 🔥 MÉTODO PARA ACTIVAR USUARIO
     public function activarUsuario()
     {
         require_admin();
         require __DIR__ . '/../../config/database.php';
 
-        // ✅ CAMBIO: Buscamos 'codigo'
         if (isset($_GET['codigo'])) {
             $codigo = $_GET['codigo'];
 
-            // ✅ CAMBIO: UPDATE usando codigoUsuario
             $stmt = $conn->prepare("UPDATE usuario SET estado = 'Activo' WHERE codigoUsuario = :codigo");
             $stmt->bindParam(':codigo', $codigo, PDO::PARAM_STR);
             $stmt->execute();
+
+            //  REGISTRO EN BITÁCORA (Activar)
+            if (function_exists('registrarActividad')) {
+                $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                registrarActividad($idUsr, "Restauró el acceso al sistema del usuario con código: " . $codigo);
+            }
         }
 
         header("Location: " . url('adminpanel'));
         exit;
     }
-    // Dentro de AdminPanelController.php
 
-    // 🔥 MÉTODO PARA MOSTRAR LA VISTA DE EDICIÓN
     public function editarUsuario() {
         require_admin();
         require __DIR__ . '/../../config/database.php';
@@ -84,7 +86,6 @@ class AdminPanelController
             exit;
         }
 
-        // Buscamos al usuario y su ID de rol actual
         $stmt = $conn->prepare("
             SELECT u.*, r.idRol 
             FROM usuario u
@@ -97,10 +98,8 @@ class AdminPanelController
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($usuario) {
-            
             $rolActual = $usuario['idRol']; 
 
-            // Traemos todos los roles para el select
             $stmtRoles = $conn->query("SELECT * FROM rol");
             $roles = $stmtRoles->fetchAll(PDO::FETCH_ASSOC);
 
@@ -115,6 +114,7 @@ class AdminPanelController
             exit;
         }
     }
+
     public function actualizarUsuario()
     {
         require_admin();
@@ -129,11 +129,9 @@ class AdminPanelController
             try {
                 $conn->beginTransaction();
 
-                // 1. Actualizar datos básicos
                 $stmt = $conn->prepare("UPDATE usuario SET nombre = ?, email = ? WHERE codigoUsuario = ?");
                 $stmt->execute([$nombre, $email, $codigo]);
 
-                // 2. Actualizar el rol (necesitamos el ID interno para la tabla pivote)
                 $userStmt = $conn->prepare("SELECT idUsuario FROM usuario WHERE codigoUsuario = ?");
                 $userStmt->execute([$codigo]);
                 $idUsuario = $userStmt->fetchColumn();
@@ -142,6 +140,13 @@ class AdminPanelController
                 $rolUpdate->execute([$rol, $idUsuario]);
 
                 $conn->commit();
+
+                //  REGISTRO EN BITÁCORA (Actualizar Datos/Rol)
+                if (function_exists('registrarActividad')) {
+                    $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                    registrarActividad($idUsr, "Modificó los datos o el nivel de privilegios del usuario con código: " . $codigo);
+                }
+
                 header("Location: " . url('adminpanel?success=Usuario actualizado'));
             } catch (Exception $e) {
                 $conn->rollBack();

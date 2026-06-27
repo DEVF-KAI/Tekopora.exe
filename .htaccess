@@ -2,9 +2,9 @@ Options -Indexes
 RewriteEngine On
 
 # Base del proyecto (subcarpeta)
-RewriteBase /Tekopora_F/
+RewriteBase /
 
-# Si el recurso existe (css, js, imgs), lo sirve directamente
+# Si el recurso existe físicamente (css, js, imgs), lo sirve directamente
 RewriteCond %{REQUEST_FILENAME} -f [OR]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^ - [L]

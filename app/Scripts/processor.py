@@ -4,16 +4,18 @@ import requests
 import mysql.connector
 import re
 
+# Configuración de salida para evitar errores de codificación en Windows
+sys.stdout.reconfigure(encoding='utf-8')
+
 def buscar_en_base_de_datos(mensaje):
     conn = None
     try:
-        config = {'host': '127.0.0.1', 'user': 'root', 'password': '', 'database': 'tekopora_db'}
+        config = {'host': 'db', 'user': 'root', 'password': '', 'database': 'tekopora_db'}
         conn = mysql.connector.connect(**config)
         cursor = conn.cursor(dictionary=True, buffered=True)
 
-        # 1. ¿El mensaje contiene algo que parece un código?
+        # 1. Búsqueda por código (Ej: OBRA-123)
         match = re.search(r'([A-Z]+-[A-Z0-9-]+)', mensaje.upper())
-        
         if match:
             criterio = match.group(1)
             sql = """
@@ -25,11 +27,14 @@ def buscar_en_base_de_datos(mensaje):
             """
             cursor.execute(sql, (criterio,))
         else:
-            # 2. BÚSQUEDA AUTOMÁTICA MEJORADA
-            # Tomamos las palabras más importantes (quitamos "de", "el", "del")
-            palabras = [p for p in mensaje.split() if len(p) > 2]
-            criterio_busqueda = f"%{palabras[-1]}%" if palabras else f"%{mensaje}%"
+            # 2. Búsqueda por palabras clave
+            palabras_ignoradas = {"quiero", "saber", "sobre", "hola", "dime", "informacion", "que", "como", "donde"}
+            palabras = [p for p in re.sub(r'[^\w\s]', '', mensaje).split() if len(p) > 2 and p.lower() not in palabras_ignoradas]
+            
+            if not palabras:
+                return None 
 
+            criterio_busqueda = f"%{palabras[-1]}%"
             sql = """
                 SELECT p.titulo, p.contenido, m.nombreMunicipio, multi.urlArchivo
                 FROM publicacion p
@@ -37,66 +42,82 @@ def buscar_en_base_de_datos(mensaje):
                 LEFT JOIN multimedia multi ON p.idPublicacion = multi.idPublicacion_FK
                 WHERE p.titulo LIKE %s OR p.contenido LIKE %s LIMIT 1
             """
-            # Buscamos usando la palabra clave más fuerte
             cursor.execute(sql, (criterio_busqueda, criterio_busqueda))
 
         resultado = cursor.fetchone()
         cursor.close()
         return resultado
-    except Exception as e:
-        # Ahora sí veremos si hay un error de conexión
-        return {"error": str(e)}
+    except Exception:
+        return None
     finally:
         if conn and conn.is_connected():
             conn.close()
 
 def consultar_n8n(mensaje_final):
-    url = "http://127.0.0.1:5678/webhook/chat-tekopora"
+    # Usamos n8n para evitar problemas de resolución de nombres en Docker
+    url = "http://n8n:5678/webhook/chat-tekopora"
     payload = {"chatInput": mensaje_final}
+    
     try:
-        response = requests.post(url, json=payload, timeout=60)
+        response = requests.post(url, json=payload, timeout=25) 
+        
         if response.status_code != 200:
-            return f"Error de n8n: {response.status_code}"
+            return f"Error HTTP {response.status_code} en n8n."
+            
         try:
             data = response.json()
-            if isinstance(data, list) and len(data) > 0:
-                item = data[0]
-                return item.get('output', item.get('text', str(item)))
-            if isinstance(data, dict):
-                return data.get('output', data.get('text', str(data)))
-            return response.text.strip()
-        except:
-            return response.text.strip()
+
+            if isinstance(data, list):
+                if len(data) > 0:
+                    data = data[0]
+                else:
+                    return "n8n devolvió una lista vacía."
+
+            return data.get('output', data.get('text', str(data)))
+            
+        except (ValueError, AttributeError):
+            return response.text
+            
     except Exception as e:
         return f"Error de conexión: {str(e)}"
 
 def main():
-    sys.stdout.reconfigure(encoding='utf-8')
-    
     if len(sys.argv) > 1:
         entrada_usuario = sys.argv[1]
     else:
         entrada_usuario = "hola"
 
+    entrada_limpia = re.sub(r'[^\w\s]', '', entrada_usuario.lower().strip())
+    saludos = ["hola", "buenas", "buenos dias", "hey", "saludos"]
+    
+    if entrada_limpia in saludos:
+        print(consultar_n8n(entrada_usuario))
+        return 
+
     contexto = buscar_en_base_de_datos(entrada_usuario)
 
-    # --- EN TU ARCHIVO processor.py ---
-    if contexto and "titulo" in contexto:
-    # Si hay datos, los empaquetamos como una instrucción obligatoria
-        url_img = contexto.get('urlArchivo') if contexto.get('urlArchivo') else "None"
+    if contexto:
+        url_img_db = contexto.get('urlArchivo')
+        
+        # 🟢 CORRECCIÓN PARA DOCKER: Eliminamos la carpeta /Tekopora_F/
+        if url_img_db and not str(url_img_db).startswith('http'):
+            url_img = f"http://localhost/public/{url_img_db}"
+        else:
+            url_img = url_img_db if url_img_db else "None"
+
         mensaje_final = (
-        f"### CONTEXTO OFICIAL TEKOPORÃ ###\n"
-        f"NOMBRE: {contexto['titulo']}\n"
-        f"DESCRIPCIÓN: {contexto['contenido']}\n"
-        f"MUNICIPIO: {contexto['nombreMunicipio']}\n"
-        f"URL_IMAGEN: {url_img}\n"
-        f"### FIN DEL CONTEXTO ###\n"
-        f"Instrucción: Usa los datos anteriores para responder a: {entrada_usuario}"
-    )
+            f"### CONTEXTO OFICIAL ###\n"
+            f"NOMBRE: {contexto['titulo']}\n"
+            f"DESCRIPCIÓN: {contexto['contenido']}\n"
+            f"MUNICIPIO: {contexto['nombreMunicipio']}\n"
+            f"URL_IMAGEN: {url_img}\n"
+            f"### FIN DEL CONTEXTO ###\n\n"
+            f"Consulta: {entrada_usuario}"
+        )
     else:
-    # Si no hay nada, activamos la cultura general
-        mensaje_final = f"CULTURA_GENERAL: No hay datos en la DB. Responde brevemente sobre: {entrada_usuario}"
+        mensaje_final = entrada_usuario
 
     print(consultar_n8n(mensaje_final))
+
 if __name__ == "__main__":
     main()

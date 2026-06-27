@@ -40,3 +40,24 @@ if (!function_exists('asset')) {
         return $basePath . '/public/' . $path;
     }
 }
+
+function registrarActividad($idUsuario, $accion) {
+    try {
+        $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
+        
+        // Capturar IP real del usuario (incluso si usa proxy)
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? 'Desconocida';
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO bitacora (accion, ip_address, idUsuario_FK) VALUES (?, ?, ?)");
+        $stmt->execute([$accion, $ip, $idUsuario]);
+    } catch (Exception $e) {
+        // Silenciamos el error para que si falla la bitácora, no se caiga el sistema principal
+        error_log("Error en bitácora: " . $e->getMessage());
+    }
+}

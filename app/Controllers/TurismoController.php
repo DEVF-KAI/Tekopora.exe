@@ -10,14 +10,14 @@ class TurismoController
     try {
         if (session_status() === PHP_SESSION_NONE) session_start();
         
-        $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+        $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         // Traemos solo los sitios aprobados y sus fotos
         $sql = "
             SELECT s.*, 
                    m.urlArchivo AS imagen_url
-            FROM sitioTuristico s
+            FROM sitioturistico s
             LEFT JOIN multimedia m ON s.idSitio = m.idSitio_FK
             WHERE s.estado = 'Aprobado' 
             ORDER BY s.fechaRegistro DESC
@@ -62,7 +62,7 @@ class TurismoController
         $sitiosPendientes = [];
 
         try {
-            $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+            $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
 
             // Añadimos codigoPublicacion a la consulta para enviarlo a la vista
             $stmt = $pdo->prepare("
@@ -97,7 +97,7 @@ class TurismoController
 
             if ($codigoPublicacion && in_array($accion, ['Aprobado', 'Rechazado'])) {
                 try {
-                    $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+                    $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
 
                     // Actualizamos usando codigoPublicacion
                     $stmt = $pdo->prepare("UPDATE publicacion SET estado = ? WHERE codigoPublicacion = ?");
@@ -140,12 +140,12 @@ class TurismoController
         $codigoSitio = "TUR-" . strtoupper(substr(md5(uniqid()), 0, 8));
 
         try {
-            $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+            $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
             $pdo->beginTransaction();
 
             // 1. Insertamos el sitio con estado 'Pendiente' por defecto (establecido en la BD)
             $stmt = $pdo->prepare("
-                INSERT INTO sitioTuristico (codigoSitio, nombre, descripcion, latitud, longitud, idUsuario_FK) 
+                INSERT INTO sitioturistico (codigoSitio, nombre, descripcion, latitud, longitud, idUsuario_FK) 
                 VALUES (?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
@@ -177,6 +177,12 @@ class TurismoController
             }
 
             $pdo->commit();
+
+            // REGISTRO EN BITÁCORA (Propuesta Ciudadana)
+            if (function_exists('registrarActividad')) {
+                registrarActividad($idUsuario, "Propuso un nuevo sitio turístico para revisión: " . $_POST['nombre']);
+            }
+
             header("Location: " . url('/turismo?success=Tu propuesta fue enviada. Un moderador la revisará pronto.'));
             exit();
 
@@ -198,14 +204,14 @@ class TurismoController
         }
 
         try {
-            $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+            $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
             
             // Buscamos los sitios pendientes, quién lo propuso y su foto
             $sql = "
                 SELECT s.*, 
                        CONCAT(u.nombre, ' ', u.appPaterno) AS proponente,
                        m.urlArchivo AS imagen_url
-                FROM sitioTuristico s
+                FROM sitioturistico s
                 JOIN usuario u ON s.idUsuario_FK = u.idUsuario
                 LEFT JOIN multimedia m ON s.idSitio = m.idSitio_FK
                 WHERE s.estado = 'Pendiente'
@@ -241,9 +247,15 @@ class TurismoController
             $nuevoEstado = ($accion === 'Aprobar') ? 'Aprobado' : 'Rechazado';
 
             try {
-                $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
-                $stmt = $pdo->prepare("UPDATE sitioTuristico SET estado = ? WHERE idSitio = ?");
+                $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
+                $stmt = $pdo->prepare("UPDATE sitioturistico SET estado = ? WHERE idSitio = ?");
                 $stmt->execute([$nuevoEstado, $idSitio]);
+
+                // 🌟 REGISTRO EN BITÁCORA (Moderación de Turismo)
+                if (function_exists('registrarActividad')) {
+                    $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                    registrarActividad($idUsr, "Revisó una propuesta turística y la marcó como: " . $nuevoEstado);
+                }
 
                 $mensaje = ($nuevoEstado === 'Aprobado') ? "Sitio aprobado y publicado en el mapa." : "Propuesta rechazada.";
                 header("Location: " . url('/turismo/revision?success=' . urlencode($mensaje)));
@@ -268,13 +280,13 @@ class TurismoController
         $idUsuario = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
 
         try {
-            $pdo = new PDO("mysql:host=localhost;dbname=tekopora_db;charset=utf8", 'root', '');
+            $pdo = new PDO("mysql:host=db;dbname=tekopora_db;charset=utf8", 'root', '');
             
             // Buscamos TODOS los sitios de este usuario específico
             $sql = "
                 SELECT s.*, 
                        m.urlArchivo AS imagen_url
-                FROM sitioTuristico s
+                FROM sitioturistico s
                 LEFT JOIN multimedia m ON s.idSitio = m.idSitio_FK
                 WHERE s.idUsuario_FK = ?
                 ORDER BY s.fechaRegistro DESC

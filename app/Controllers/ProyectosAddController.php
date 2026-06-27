@@ -2,10 +2,6 @@
 
 class ProyectosaddController
 {
-
-    /**
-     * Muestra el formulario con los catálogos (Macrodistritos, Empresas y Moderadores)
-     */
     public function proyectosadd()
     {
         if (session_status() === PHP_SESSION_NONE)
@@ -13,11 +9,9 @@ class ProyectosaddController
 
         require __DIR__ . '/../../config/database.php';
 
-        // 1. Cargamos catálogos
         $macrodistritos = $conn->query("SELECT idMacrodistrito, nombreMacrodistrito FROM macrodistrito")->fetchAll(PDO::FETCH_ASSOC);
-        $empresas = $conn->query("SELECT idEmpresa, nombreEmpresa FROM empresaConstructora")->fetchAll(PDO::FETCH_ASSOC);
+        $empresas = $conn->query("SELECT idEmpresa, nombreEmpresa FROM empresaconstructora")->fetchAll(PDO::FETCH_ASSOC);
 
-        // 2. Cargamos moderadores (Usuarios con rol 'Moderador Obra')
         $sqlMod = "SELECT u.idUsuario, u.nombre, u.appPaterno 
                    FROM usuario u
                    JOIN usuario_rol ur ON u.idUsuario = ur.idUsuario_FK
@@ -33,9 +27,6 @@ class ProyectosaddController
         require __DIR__ . '/../../views/layouts/app_layout.php';
     }
 
-    /**
-     * Procesa el guardado: Proyecto + Imagen (Estructura Foro) + Asignación
-     */
     public function store()
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST')
@@ -45,7 +36,6 @@ class ProyectosaddController
         if (session_status() === PHP_SESSION_NONE)
             session_start();
 
-        // El ID de quien opera y el moderador asignado
         $idAdmin = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'] ?? null;
         $idModeradorAsignado = $_POST['idModerador'];
 
@@ -59,7 +49,6 @@ class ProyectosaddController
         try {
             $conn->beginTransaction();
 
-            // 1. Insertar Proyecto (idUsuario_FK = Moderador Responsable)
             $sqlProj = "INSERT INTO proyecto (
                 codigoProyecto, nombreProyecto, descripcion, presupuesto, 
                 fechaInicio, fechaEntregaEstimada, avancePorcentaje, 
@@ -83,14 +72,9 @@ class ProyectosaddController
 
             $idNuevoProyecto = $conn->lastInsertId();
 
-            // 2. LÓGICA DE IMAGEN (Carpeta propia por proyecto)
-            // 2. LÓGICA DE IMAGEN (Carpeta propia por proyecto en Proyectos_imgs)
             if (isset($_FILES['imagenProyecto']) && $_FILES['imagenProyecto']['error'] === UPLOAD_ERR_OK) {
-
                 $ext = pathinfo($_FILES['imagenProyecto']['name'], PATHINFO_EXTENSION);
                 $nombreArchivo = time() . '_inicio.' . $ext;
-
-                //  CAMBIO 1: Añadimos Proyectos_imgs a la ruta física
                 $rutaCarpeta = __DIR__ . '/../../public/imgs/Proyectos_imgs/' . $codigoProyecto . '/';
 
                 if (!file_exists($rutaCarpeta)) {
@@ -100,18 +84,12 @@ class ProyectosaddController
                 $rutaFinal = $rutaCarpeta . $nombreArchivo;
 
                 if (move_uploaded_file($_FILES['imagenProyecto']['tmp_name'], $rutaFinal)) {
-                    // CAMBIO 2: Añadimos Proyectos_imgs a la ruta de la base de datos
                     $urlBD = 'imgs/Proyectos_imgs/' . $codigoProyecto . '/' . $nombreArchivo;
-
                     $stmtMulti = $conn->prepare("INSERT INTO multimedia (urlArchivo, tipo, idProyecto_FK) VALUES (:url, 'imagen', :idProy)");
-                    $stmtMulti->execute([
-                        ':url' => $urlBD,
-                        ':idProy' => $idNuevoProyecto
-                    ]);
+                    $stmtMulti->execute([':url' => $urlBD, ':idProy' => $idNuevoProyecto]);
                 }
             }
 
-            // 3. Vínculos con Macrodistrito y Empresa
             $conn->prepare("INSERT INTO macrodistrito_proyecto (idMacrodistrito_FK, idProyecto_FK) VALUES (?, ?)")
                 ->execute([$_POST['idMacrodistrito'], $idNuevoProyecto]);
 
@@ -119,6 +97,12 @@ class ProyectosaddController
                 ->execute([$idNuevoProyecto, $_POST['idEmpresa']]);
 
             $conn->commit();
+
+            // 🌟 REGISTRO EN BITÁCORA (Crear Obra)
+            if (function_exists('registrarActividad')) {
+                registrarActividad($idAdmin, "Registró y asignó el nuevo proyecto público: " . $codigoProyecto);
+            }
+
             header("Location: " . url('/proyectos?success=Proyecto registrado y asignado correctamente'));
             exit();
 

@@ -48,7 +48,6 @@ class EmpresasAddController {
             }
 
             // Inserción en la base de datos
-            // Usamos el NIT directamente en 'codigoEmpresa'
             $sql = "INSERT INTO empresaConstructora (codigoEmpresa, nombreEmpresa, telefono, direccion) VALUES (?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             
@@ -58,6 +57,12 @@ class EmpresasAddController {
                 $telefono,
                 $direccion
             ]);
+
+            // REGISTRO EN BITÁCORA (Nueva Empresa)
+            if (isset($_SESSION['usuario']) && function_exists('registrarActividad')) {
+                $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+                registrarActividad($idUsr, "Registró en el sistema a la empresa constructora: " . $nombre . " (NIT: " . $nit . ")");
+            }
 
             // Redirigir al listado con éxito
             header("Location: " . url('/empresas?success=Empresa registrada correctamente'));

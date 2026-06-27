@@ -33,7 +33,7 @@
                                         
                                         <h5 class="font-weight-bold text-dark"><?= htmlspecialchars($sitio['nombre']) ?></h5>
                                         <p class="small text-muted mb-2">
-                                            <i class="fas fa-user-circle mr-1"></i> Propuesto por: <b><?= htmlspecialchars($sitio['proponente']) ?></b>
+                                            <i class="fas fa-user-circle mr-1"></i> Propuesto por: <b><?= htmlspecialchars($sitio['proponente'] ?? 'Anónimo') ?></b>
                                         </p>
                                         
                                         <p class="card-text small text-muted flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">

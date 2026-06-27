@@ -285,24 +285,89 @@ body {
                 </div>
             </div>
 
+            <div class="card modern-card mt-4">
+                <div class="card-header">
+                    <i class="fas fa-comments"></i> Participación en el Foro
+                </div>
+                <div class="card-body p-3">
+                    <?php if (!empty($foroActividad)): ?>
+                        <div class="list-group list-group-flush">
+                            <?php 
+                            $mostrarInicial = 3; // Cuántos mostrar antes del "Ver más"
+                            $contador = 0;
+                            foreach ($foroActividad as $f): 
+                                $contador++;
+                                $iconoForo = ($f['tipo'] == 'Publicación') ? 'fa-bullhorn text-warning' : 'fa-reply text-info';
+                                
+                                // Si pasamos el límite, abrimos el contenedor colapsable
+                                if ($contador == $mostrarInicial + 1) {
+                                    echo '<div class="collapse" id="collapseForo">';
+                                }
+                            ?>
+                                <div class="list-group-item d-flex justify-content-between align-items-center border-0 mb-2 rounded shadow-sm" style="background-color: #fcfcfc; border-left: 3px solid #1A6A6D !important;">
+                                    <div class="d-flex align-items-center">
+                                        <div class="p-2 me-3" style="width: 40px; text-align: center;">
+                                            <i class="fas <?= $iconoForo ?> fa-lg"></i>
+                                        </div>
+                                        <div>
+                                            <span class="badge badge-light mb-1 border"><?= $f['tipo'] ?></span>
+                                            <h6 class="mb-0 text-dark font-weight-bold" style="font-size: 0.9em;">
+                                                "<?= htmlspecialchars(strlen($f['descripcion']) > 60 ? substr($f['descripcion'], 0, 60).'...' : $f['descripcion']) ?>"
+                                            </h6>
+                                        </div>
+                                    </div>
+                                    <span class="text-muted small fw-bold">
+                                        <?= htmlspecialchars(date('d/m H:i', strtotime($f['fecha'] ?? 'now'))) ?>
+                                    </span>
+                                </div>
+                            <?php endforeach; ?>
+                            
+                            <?php if ($contador > $mostrarInicial): ?>
+                                </div> <!-- Cierra el collapse -->
+                                <button class="btn btn-sm btn-outline-secondary mt-2 w-100 rounded-pill font-weight-bold" type="button" data-toggle="collapse" data-target="#collapseForo" aria-expanded="false" aria-controls="collapseForo" onclick="this.innerText = this.innerText === 'Ver más participaciones' ? 'Ocultar participaciones' : 'Ver más participaciones'">
+                                    Ver más participaciones
+                                </button>
+                            <?php endif; ?>
+                        </div>
+                    <?php else: ?>
+                        <div class="empty-state py-4">
+                            <i class="fas fa-comment-slash"></i>
+                            <h6 class="fw-bold">Aún no hay participación</h6>
+                            <p class="small mb-0">Tus aportes en el foro ciudadano aparecerán aquí.</p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <div class="card modern-card">
                 <div class="card-header">
                     <i class="fas fa-history"></i> Historial de Actividad
                 </div>
-                <div class="card-body p-3">
+                <div class="card-body p-3" style="max-height: 400px; overflow-y: auto;">
                     <?php if (!empty($actividad)): ?>
                         <div class="list-group list-group-flush">
                             <?php foreach ($actividad as $a): ?>
-                                <div class="list-group-item d-flex justify-content-between align-items-center border-0 mb-2 rounded" style="background-color: #f8f9fa;">
+                                <?php 
+                                    // Lógica para asignar un icono dependiendo de la acción
+                                    $desc = strtolower($a['descripcion']);
+                                    $icon = 'fa-check text-success'; // Por defecto
+                                    
+                                    if (strpos($desc, 'sesión') !== false) $icon = 'fa-sign-in-alt text-primary';
+                                    elseif (strpos($desc, 'publicación') !== false) $icon = 'fa-file-alt text-warning';
+                                    elseif (strpos($desc, 'comentó') !== false) $icon = 'fa-comment-dots text-info';
+                                    elseif (strpos($desc, 'reportó') !== false) $icon = 'fa-hard-hat text-danger';
+                                    elseif (strpos($desc, 'voto') !== false) $icon = 'fa-star text-warning';
+                                ?>
+                                <div class="list-group-item d-flex justify-content-between align-items-center border-0 mb-2 rounded shadow-sm" style="background-color: #ffffff; border-left: 3px solid #217F82 !important;">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-white p-2 rounded shadow-sm border me-3">
-                                            <i class="fas fa-check text-success"></i>
+                                        <div class="p-2 me-3" style="width: 40px; text-align: center;">
+                                            <i class="fas <?= $icon ?> fa-lg"></i>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0 fw-bold" style="font-size: 0.9em;"><?= htmlspecialchars($a['descripcion'] ?? '') ?></h6>
+                                            <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.9em;"><?= htmlspecialchars($a['descripcion'] ?? '') ?></h6>
                                         </div>
                                     </div>
-                                    <span class="text-muted small">
+                                    <span class="text-muted small fw-bold">
                                         <i class="far fa-clock"></i> <?= htmlspecialchars(date('d/m H:i', strtotime($a['fecha'] ?? 'now'))) ?>
                                     </span>
                                 </div>

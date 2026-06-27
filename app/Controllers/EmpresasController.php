@@ -2,7 +2,7 @@
 class EmpresasController {
     public function empresas() {
        require __DIR__ . '/../../config/database.php';
-       $stmt = $conn->query("SELECT * FROM empresaConstructora ORDER BY nombreEmpresa ASC");
+       $stmt = $conn->query("SELECT * FROM empresaconstructora ORDER BY nombreEmpresa ASC");
     
     // 3. Guardarlos en la variable que la vista espera
     $empresas = $stmt->fetchAll(PDO::FETCH_ASSOC);

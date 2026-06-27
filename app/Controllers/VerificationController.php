@@ -51,7 +51,7 @@ class VerificationController {
             $mail->Host       = 'smtp.gmail.com'; // Servidor de Google
             $mail->SMTPAuth   = true;
             
-            // 🔥 PON TUS DATOS AQUÍ 🔥
+            // DATOS DE GOOGLE CLOUD
             $mail->Username   = 'e1000villca@gmail.com';  // Tu correo
             $mail->Password   = 'jlmg oduv pwze kfuy';   // La Contraseña de Aplicación de Google (sin espacios)
             
@@ -60,7 +60,7 @@ class VerificationController {
             $mail->CharSet    = 'UTF-8';
 
             // Quién lo envía y a quién va dirigido
-            $mail->setFrom('e1000villca@gmail.com', 'TekoPorã Bolivia'); // Pon tu correo de nuevo aquí
+            $mail->setFrom('tekoporainfo@gmail.com', 'TekoPorã Bolivia'); // Pon tu correo de nuevo aquí
             $mail->addAddress($emailDestino);
 
             // Diseño HTML del correo

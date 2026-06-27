@@ -1,5 +1,4 @@
 <?php
-// Importamos la librería Dompdf
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -11,7 +10,6 @@ class ReportesController {
         if (session_status() === PHP_SESSION_NONE) session_start();
         require __DIR__ . '/../../config/database.php';
 
-        // 1. Validar que SOLO el Administrador pueda generar esto
         if (empty($_SESSION['usuario']) || $_SESSION['usuario']['rol'] !== 'Administrador') {
             die("Acceso denegado. Solo el administrador puede generar auditorías.");
         }
@@ -22,11 +20,7 @@ class ReportesController {
         date_default_timezone_set('America/La_Paz');
         $fechaActual = date('d/m/Y H:i');
 
-        // ========================================================
-        // 2A. REPORTE DE USUARIOS
-        // ========================================================
         if ($area === 'usuarios') {
-            // Unimos las 3 tablas para sacar el nombre real del rol desde la tabla pivote
             $sql = "SELECT u.*, r.nombre AS nombre_rol 
                     FROM usuario u
                     LEFT JOIN usuario_rol ur ON u.idUsuario = ur.idUsuario_FK
@@ -80,11 +74,8 @@ class ReportesController {
                     <tbody>";
 
             foreach ($usuarios as $u) {
-                // Usamos los operadores ?? para que si una columna no existe, no explote
                 $nombreCompleto = htmlspecialchars(trim(($u['nombre'] ?? 'Usuario') . ' ' . ($u['appPaterno'] ?? '')));
                 $email = htmlspecialchars($u['email'] ?? 'Sin correo');
-                
-                // Extraemos el rol que vino del JOIN (nombre_rol)
                 $rolStr = $u['nombre_rol'] ?? 'Ciudadano'; 
                 $estadoStr = $u['estado'] ?? 'Activo';
 
@@ -106,11 +97,7 @@ class ReportesController {
             </body>
             </html>";
             
-        // ========================================================
-        // 2B. REPORTE DE EMPRESAS CONSTRUCTORAS
-        // ========================================================
         } elseif ($area === 'empresas') {
-            // Asumo que tu tabla se llama 'empresas'
             $stmt = $conn->query("SELECT nombre_empresa, nit, representante, email_contacto, estado FROM empresas ORDER BY idEmpresa DESC");
             $empresas = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -156,7 +143,6 @@ class ReportesController {
                     <tbody>";
 
             foreach ($empresas as $e) {
-                // Ajusta estos nombres según las columnas reales de tu tabla empresas
                 $nombreEmp = htmlspecialchars($e['nombre_empresa'] ?? 'N/A');
                 $nit = htmlspecialchars($e['nit'] ?? 'N/A');
                 $representante = htmlspecialchars($e['representante'] ?? 'N/A');
@@ -179,19 +165,13 @@ class ReportesController {
             </body>
             </html>";
         
-            
-        // ========================================================
-        // 2C. REPORTE DE PROYECTOS (ESTADO DE OBRAS)
-        // ========================================================
         } elseif ($area === 'proyectos') {
-            // Unimos proyecto -> proyecto_empresa -> empresaConstructora
-            // Y traemos el macrodistrito a través de macrodistrito_proyecto -> macrodistrito
             $sql = "
                 SELECT p.codigoProyecto, p.nombreProyecto, p.presupuesto, p.avancePorcentaje, p.estado, 
                        e.nombreEmpresa, m.nombreMacrodistrito
                 FROM proyecto p
                 LEFT JOIN proyecto_empresa pe ON p.idProyecto = pe.idProyecto_FK
-                LEFT JOIN empresaConstructora e ON pe.idEmpresa_FK = e.idEmpresa
+                LEFT JOIN empresaconstructora e ON pe.idEmpresa_FK = e.idEmpresa 
                 LEFT JOIN macrodistrito_proyecto mp ON p.idProyecto = mp.idProyecto_FK
                 LEFT JOIN macrodistrito m ON mp.idMacrodistrito_FK = m.idMacrodistrito
                 ORDER BY p.avancePorcentaje DESC
@@ -200,7 +180,6 @@ class ReportesController {
             $stmt = $conn->query($sql);
             $proyectos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            // Calcular el "EXTRA": Estadísticas financieras y de avance
             $totalProyectos = count($proyectos);
             $proyectosCompletados = 0;
             $sumaPresupuestos = 0;
@@ -226,7 +205,6 @@ class ReportesController {
                     .header h1 { color: #1e3c72; margin: 0; font-size: 24px; }
                     .header p { margin: 5px 0; color: #666; font-size: 12px; }
                     
-                    /* Cajas de resumen ejecutivo */
                     .dashboard { width: 100%; margin-bottom: 20px; text-align: center; }
                     .box { display: inline-block; width: 30%; background: #f4f7f6; padding: 15px; border-radius: 8px; margin: 1%; box-sizing: border-box; }
                     .box-title { font-size: 10px; text-transform: uppercase; color: #7f8c8d; font-weight: bold; margin-bottom: 5px; }
@@ -250,7 +228,6 @@ class ReportesController {
                     <p>Generador: " . ($_SESSION['usuario']['nombre'] ?? 'Administrador') . "</p>
                 </div>
 
-                <!-- Resumen Ejecutivo -->
                 <div class='dashboard'>
                     <div class='box'>
                         <div class='box-title'>Total de Obras</div>
@@ -317,33 +294,117 @@ class ReportesController {
                 </table>
             </body>
             </html>";
+
+        } elseif ($area === 'bitacora') {
             
+            $usuariosSeleccionados = $_POST['usuarios_ids'] ?? []; 
+            
+            if (empty($usuariosSeleccionados)) {
+                die("Debes seleccionar al menos un usuario para generar el reporte de bitácora.");
+            }
+
+            $placeholders = str_repeat('?,', count($usuariosSeleccionados) - 1) . '?';
+
+            $sql = "
+                SELECT 
+                    b.accion, 
+                    DATE_FORMAT(b.fechaHora, '%d/%m/%Y %H:%i:%s') as fecha_exacta, 
+                    CONCAT(u.nombre, ' ', u.appPaterno) as nombre_completo,
+                    r.nombre as rol
+                FROM bitacora b
+                JOIN usuario u ON b.idUsuario_FK = u.idUsuario
+                LEFT JOIN usuario_rol ur ON u.idUsuario = ur.idUsuario_FK
+                LEFT JOIN rol r ON ur.idRol_FK = r.idRol
+                WHERE u.idUsuario IN ($placeholders)
+                ORDER BY b.fechaHora DESC
+            ";
+
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($usuariosSeleccionados);
+            $registros = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $totalRegistros = count($registros);
+
+            $html = "
+            <html>
+            <head>
+                <style>
+                    body { font-family: 'Helvetica', sans-serif; color: #333; }
+                    .header { text-align: center; border-bottom: 2px solid #217F82; padding-bottom: 10px; margin-bottom: 20px; }
+                    .header h1 { color: #1e3c72; margin: 0; font-size: 24px; }
+                    .header p { margin: 5px 0; color: #666; font-size: 12px; }
+                    .stats-box { background: #f4f7f6; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center;}
+                    table { width: 100%; border-collapse: collapse; font-size: 10px; margin-top: 15px; }
+                    th { background-color: #2c3e50; color: white; padding: 8px; text-align: left; }
+                    td { padding: 8px; border-bottom: 1px solid #ddd; }
+                </style>
+            </head>
+            <body>
+                <div class='header'>
+                    <h1>Auditoría de Actividad (Bitácora)</h1>
+                    <p>Documento generado automáticamente el: {$fechaActual}</p>
+                    <p>Generado por: " . ($_SESSION['usuario']['nombre'] ?? 'Administrador') . "</p>
+                </div>
+
+                <div class='stats-box'>
+                    <strong>Total de Acciones Registradas en el periodo consultado:</strong> {$totalRegistros}
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th width='30%'>Usuario / Rol</th>
+                            <th width='45%'>Acción Realizada</th>
+                            <th width='25%'>Fecha y Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody>";
+
+            foreach ($registros as $row) {
+                $nombre = htmlspecialchars($row['nombre_completo']);
+                $rol = htmlspecialchars($row['rol'] ?? 'Ciudadano');
+                $accion = htmlspecialchars($row['accion']);
+                $fecha = $row['fecha_exacta'];
+
+                $html .= "
+                    <tr>
+                        <td>
+                            <strong>{$nombre}</strong><br>
+                            <span style='color: #7f8c8d; font-size: 9px;'>{$rol}</span>
+                        </td>
+                        <td>{$accion}</td>
+                        <td>{$fecha}</td>
+                    </tr>";
+            }
+
+            $html .= "
+                    </tbody>
+                </table>
+            </body>
+            </html>";
         } else {
             die("Área de auditoría no válida.");
         }
 
-        // ========================================================
-        // 3. CONFIGURAR Y RENDERIZAR DOMPDF
-        // ========================================================
+        if (function_exists('registrarActividad')) {
+            $idUsr = $_SESSION['usuario']['idUsuario'] ?? $_SESSION['usuario']['id'];
+            registrarActividad($idUsr, "Generó un reporte PDF de auditoría del área: " . strtoupper($area));
+        }
+
         $options = new Options();
         $options->set('isHtml5ParserEnabled', true);
-        $options->set('isRemoteEnabled', true); // Permite cargar imágenes remotas
+        $options->set('isRemoteEnabled', true); 
         
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
         
-        // Formato carta y orientación vertical (portrait)
         $dompdf->setPaper('letter', 'portrait');
-        
-        // Renderizar el HTML como PDF
         $dompdf->render();
         
-        // 🔥 LA MAGIA: Limpiar cualquier basura oculta antes de enviar el PDF[cite: 4]
         if (ob_get_length()) {
             ob_end_clean();
         }
         
-        // Enviar el PDF al navegador (Attachment => false hace que se abra en una pestaña nueva)
         $dompdf->stream("Auditoria_Tekopora_{$area}_{$fechaActual}.pdf", array("Attachment" => false));
     }
 }
